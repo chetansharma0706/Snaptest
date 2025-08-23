@@ -16,11 +16,16 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         },
     })
 
+    const teacherName = await prisma.user.findUnique({
+        where: { id: test?.createdBy },
+        select: { name: true }
+    })
+
     if (!test) {
         console.log("no test found")
         return notFound()
     }
     return (
-        <TestPage test={test}/>
+        <TestPage test={test} teacherName={teacherName?.name}/>
     )
 }

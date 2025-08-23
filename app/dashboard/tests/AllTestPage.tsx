@@ -152,7 +152,6 @@ export default function AllTestsPage({ tests }: { tests: any }) {
                 <div className="grid auto-rows-min gap-4 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2">
                     {tests && tests.map((test: any, index: number) => {
                         return (
-                            <>
 
                                 <TestCard
                                     id={test.id}
@@ -167,7 +166,6 @@ export default function AllTestsPage({ tests }: { tests: any }) {
                                     onEdit={() => { router.push(`/test/${test.id}`) }}
                                     onDelete={() => handleDelete(test.id)}
                                  />
-                            </>
                         )
 
                     })}
