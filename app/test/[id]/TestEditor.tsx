@@ -31,6 +31,7 @@ import { QuestionEditorSkeleton } from '@/components/QuestionEditorSkeleton';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger, DropdownMenu } from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
+import { ShareUrlDialog } from '@/components/ShareUrl';
 
 
 interface Option {
@@ -183,8 +184,11 @@ function reducer(state: TestState, actions: Actions): TestState {
 
 
 export default function TestEditor({ test }: { test: any }) {
+    const [open, setOpen] = useState(false)
 
     const router = useRouter();
+
+    console.log(test.status)
 
     const intialState: TestState = {
         title: test.title,
@@ -223,18 +227,19 @@ export default function TestEditor({ test }: { test: any }) {
 
     // Usage
     const cleanedQuestions = cleanQuestions(questions);
-
+    const data = {
+        title: title,
+        description: description,
+        questions: cleanedQuestions,
+        timeLimit: timeLimit,
+        status: status,
+    }
 
     async function handleSave() {
         dispatch({ type: "SET_SAVE_LOADING", payload: true })
+        console.log(status)
         try {
-            const data = {
-                title: title,
-                description: description,
-                questions: cleanedQuestions,
-                timeLimit: timeLimit,
-                status: status,
-            }
+
             const response = await fetch(`/api/tests/${test.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
@@ -254,6 +259,37 @@ export default function TestEditor({ test }: { test: any }) {
             dispatch({ type: "SET_SAVE_LOADING", payload: false })
         }
 
+    }
+
+    async function handlePublish(type: string) {
+        dispatch({ type: "SET_PUB_LOADING", payload: true })
+        dispatch({ type: "SET_STATUS", payload: "PUBLISHED" })
+        const newStatus = type === "PUBLISH" ? "PUBLISHED" : "DRAFT"
+        try {
+
+            const response = await fetch(`/api/tests/${test.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ...data, status: newStatus })
+
+            })
+
+            if (response.ok) {
+                if(type === "PUBLISH"){
+                alert("Test Published Successfully!")}else{
+                    alert("Test Unpublished Successfully!")
+                }
+            } else {
+                console.log("Something went wrong")
+            }
+
+        } catch (error) {
+            console.error("Something went wrong", error)
+        } finally {
+            dispatch({ type: "SET_PUB_LOADING", payload: false })
+            if(type === "PUBLISH") return setOpen(true)
+
+        }
     }
 
 
@@ -368,25 +404,32 @@ export default function TestEditor({ test }: { test: any }) {
                                 {saveLoading ? "Saving..." : "Save"}
                                 <Save />
                             </Button>
+                            {status === "PUBLISHED" && <><ShareUrlDialog open={open} onOpenChange={setOpen} url={`${window.location.origin}/attempt/${test.id}`}><Button variant="ghost" disabled={saveLoading || publishLoading || aiLoading}>
+                                <Share2 size={8} />
+                            </Button></ShareUrlDialog>
+
+                            </>}
 
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className='rounded-full'><EllipsisVertical /></Button>
+                                    <EllipsisVertical size={20}/>
 
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent>
-                                    <DropdownMenuItem disabled={cleanedQuestions.length < 3 || publishLoading || saveLoading || aiLoading}>
-                                        {publishLoading && <Loader2 className="animate-spin h-4 w-4" />}
-                                        {publishLoading ? "Publishing..." : "Publish"} <Upload size={8} />
-                                    </DropdownMenuItem>
+                                    {status === "PUBLISHED" ? (
+                                        <DropdownMenuItem disabled={cleanedQuestions.length < 3 || publishLoading || saveLoading || aiLoading} onClick={() => handlePublish("UNPUBLISH")}>
+                                            {publishLoading && <Loader2 className="animate-spin h-4 w-4" />}
+                                            {publishLoading ? "Unpublishing..." : "Unpublish"} <Upload size={8} />
+                                        </DropdownMenuItem>
+                                    ) : (
+                                        <DropdownMenuItem disabled={cleanedQuestions.length < 3 || publishLoading || saveLoading || aiLoading} onClick={() => handlePublish("PUBLISH")}>
+                                            {publishLoading && <Loader2 className="animate-spin h-4 w-4" />}
+                                            {publishLoading ? "Publishing..." : "Publish"} <Upload size={8} />
+                                        </DropdownMenuItem>
+                                    )}
                                     <Separator />
-                                    {status === "PUBLISHED" && <><DropdownMenuItem>
-                                        Share <Share2 size={8} />
-                                    </DropdownMenuItem>
-                                        <Separator />
 
-                                    </>}
-                                    <DropdownMenuItem onClick={() => router.push("/")}>
+                                    <DropdownMenuItem onClick={() => router.push("/")} disabled={saveLoading || publishLoading || aiLoading}>
                                         Close  <X className="h-4 w-4" />
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
@@ -437,7 +480,7 @@ export default function TestEditor({ test }: { test: any }) {
                                     <Separator />
 
                                     <DropdownMenuItem
-                                        disabled={questions.length < 1 || saveLoading}
+                                        disabled={questions.length < 1 || saveLoading || publishLoading || aiLoading}
                                         onClick={handleSave}
                                     >
                                         {saveLoading && <Loader2 className="animate-spin h-4 w-4" />}
@@ -445,13 +488,26 @@ export default function TestEditor({ test }: { test: any }) {
                                         <Save />
                                     </DropdownMenuItem>
                                     <Separator />
+                                    {status === "PUBLISHED" && <><ShareUrlDialog open={open} onOpenChange={setOpen} url={`${window.location.origin}/attempt/${test.id}`}><Button variant="ghost" disabled={saveLoading || publishLoading || aiLoading}>
+                                        <Share2 size={8} />
+                                    </Button></ShareUrlDialog>
 
-                                    <DropdownMenuItem disabled={cleanedQuestions.length < 3}>
-                                        Publish
-                                    </DropdownMenuItem>
+                                    </>}
+
+                                    {status === "PUBLISHED" ? (
+                                        <DropdownMenuItem disabled={cleanedQuestions.length < 3 || publishLoading || saveLoading || aiLoading} onClick={() => handlePublish("UNPUBLISH")}>
+                                            {publishLoading && <Loader2 className="animate-spin h-4 w-4" />}
+                                            {publishLoading ? "Unpublishing..." : "Unpublish"} <Upload size={8} />
+                                        </DropdownMenuItem>
+                                    ) : (
+                                        <DropdownMenuItem disabled={cleanedQuestions.length < 3 || publishLoading || saveLoading || aiLoading} onClick={() => handlePublish("PUBLISH")}>
+                                            {publishLoading && <Loader2 className="animate-spin h-4 w-4" />}
+                                            {publishLoading ? "Publishing..." : "Publish"} <Upload size={8} />
+                                        </DropdownMenuItem>
+                                    )}
                                     <Separator />
 
-                                    <DropdownMenuItem onClick={() => router.push("/")}>
+                                    <DropdownMenuItem onClick={() => router.push("/")} disabled={saveLoading || publishLoading || aiLoading}>
                                         Close <X />
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>

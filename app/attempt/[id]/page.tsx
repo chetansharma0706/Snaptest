@@ -17,6 +17,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     })
 
     if (!test) {
+        console.log("no test found")
         notFound()
     }
     return (
