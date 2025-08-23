@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Clock, Users, BookOpen, MoreHorizontal, Edit, Share, Trash2, MessageCircleQuestionMark } from "lucide-react"
+import { ShareUrlDialog } from "./ShareUrl"
+import { useState } from "react"
 
 export interface TestCardProps {
   id: string
@@ -43,6 +45,8 @@ export function TestCard({
   onDelete,
 }: TestCardProps) {
 
+  const [open, setOpen] = useState(false)
+
   function truncateText(text: string, maxLength: number): string {
     if (!text) return ""
     return text.length > maxLength ? text.slice(0, maxLength) + "..." : text
@@ -67,6 +71,7 @@ export function TestCard({
     <Card
       className={`p-5 hover:shadow-md transition-all duration-200 cursor-pointer group rounded-2xl`}
     >
+      <ShareUrlDialog open={open} onOpenChange={setOpen} url={`${window.location.origin}/attempt/${id}`} />
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         {/* Left Section */}
         <div className="flex items-start justify-center gap-3 sm:flex-1">
@@ -81,7 +86,7 @@ export function TestCard({
               <h3 className="text-base sm:text-lg font-semibold text-card-foreground truncate">
                 {truncateText(title, 20)}
               </h3>
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className={`text-xs ${getStatusColor(status)}`}>
                 {status}
               </Badge>
             </div>
@@ -114,11 +119,11 @@ export function TestCard({
                   Edit Test
                 </DropdownMenuItem>
               )}
-              {onShare && (
+              {status === "PUBLISHED" && (
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation()
-                    onShare()
+                    setOpen(true)
                   }}
                 >
                   <Share className="mr-2 h-4 w-4" />

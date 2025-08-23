@@ -1,5 +1,6 @@
 "use client"
 import DialogModal from "@/components/dialogModal"
+import { ShareUrlDialog } from "@/components/ShareUrl"
 import { TestCard } from "@/components/testCard"
 import {
     Breadcrumb,
@@ -20,6 +21,7 @@ import { FormEvent, useState } from "react"
 export default function AllTestsPage({ tests }: { tests: any }) {
     console.log(tests)
     const [open, setOpen] = useState(false)
+
     const [loading, setLoading] = useState(false)
     const router = useRouter()
 
@@ -141,7 +143,7 @@ export default function AllTestsPage({ tests }: { tests: any }) {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                     <div className="flex items-center gap-4">
                         {tests.length !== 0 ? <h1 className="text-2xl font-semibold text-foreground">All Created Tests</h1> :
-                        <h2 className="text-xl font-semibold text-foreground">No tests created yet. Start by creating your first test!</h2>}
+                            <h2 className="text-xl font-semibold text-foreground">No tests created yet. Start by creating your first test!</h2>}
                     </div>
                     <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg" onClick={() => setOpen(true)}>Create new Test <Plus /></Button>
                     <DialogModal open={open} setOpen={setOpen} loading={loading} handleSubmit={handleSubmit} description="Fill in the details below to create a new test." title="Create Test" />
@@ -150,19 +152,23 @@ export default function AllTestsPage({ tests }: { tests: any }) {
                 <div className="grid auto-rows-min gap-4 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2">
                     {tests && tests.map((test: any, index: number) => {
                         return (
-                            <TestCard
-                                id={test.id}
-                                key={index}
-                                title={test.title}
-                                description={test.description}
-                                duration={test.timeLimit}
-                                nQuestions={test.questions.length}
-                                status={test.status}
-                                nResponses={test.attempts.length}
-                                timeAgo={timeAgo(test.createdAt)}
-                                onEdit={() => { router.push(`/test/${test.id}`) }}
-                                onDelete={() => handleDelete(test.id)}
-                                onShare={() => { }} />)
+                            <>
+
+                                <TestCard
+                                    id={test.id}
+                                    key={index}
+                                    title={test.title}
+                                    description={test.description}
+                                    duration={test.timeLimit}
+                                    nQuestions={test.questions.length}
+                                    status={test.status}
+                                    nResponses={test.attempts.length}
+                                    timeAgo={timeAgo(test.createdAt)}
+                                    onEdit={() => { router.push(`/test/${test.id}`) }}
+                                    onDelete={() => handleDelete(test.id)}
+                                 />
+                            </>
+                        )
 
                     })}
                 </div>

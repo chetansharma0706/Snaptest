@@ -51,12 +51,7 @@ export function ShareUrlDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        {children || (
-          <Button variant="outline" size="sm" className="gap-2 bg-transparent">
-            <Share2 className="h-4 w-4" />
-            Share
-          </Button>
-        )}
+        {children} 
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
@@ -95,7 +90,7 @@ export function ShareUrlDialog({
               variant="outline"
               size="sm"
               onClick={openInNewTab}
-              className="w-full gap-2 hover:bg-accent/10 hover:text-accent hover:border-accent/20 bg-transparent"
+              className="w-full gap-2 hover:bg-secondary bg-transparent"
             >
               <ExternalLink className="h-4 w-4" />
               Open in New Tab

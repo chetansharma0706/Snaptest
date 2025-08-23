@@ -263,8 +263,8 @@ export default function TestEditor({ test }: { test: any }) {
 
     async function handlePublish(type: string) {
         dispatch({ type: "SET_PUB_LOADING", payload: true })
-        dispatch({ type: "SET_STATUS", payload: "PUBLISHED" })
         const newStatus = type === "PUBLISH" ? "PUBLISHED" : "DRAFT"
+        dispatch({ type: "SET_STATUS", payload: newStatus })
         try {
 
             const response = await fetch(`/api/tests/${test.id}`, {
@@ -411,8 +411,8 @@ export default function TestEditor({ test }: { test: any }) {
                             </>}
 
                             <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <EllipsisVertical size={20}/>
+                                <DropdownMenuTrigger asChild disabled={publishLoading}>
+                                    {publishLoading ? <Loader2 className="animate-spin h-6 w-6" /> :<EllipsisVertical size={20}/>}
 
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent>
