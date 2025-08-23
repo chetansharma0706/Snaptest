@@ -1,31 +1,45 @@
 import { prisma } from "@/lib/prisma";
 import TestPage from "./TestPage";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@/auth";
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
-
-    const testId = (await params).id
+    const session = await auth();
+    const testId = (await params).id;
+    if (!session) {
+      // Not authenticated - redirect to login with return URL
+      const currentUrl = encodeURIComponent(`/attempt/${testId}`);
+      redirect(`/?callbackUrl=${currentUrl}`);
+      return;
+    }
+    
+    // Fetch the quiz/test
     const test = await prisma.quiz.findUnique({
         where: { id: testId, status: "PUBLISHED" },
         include: {
             questions: {
                 include: {
-                    options: true, // fetch options for each question
+                    options: true,
                 },
             },
         },
-    })
+    });
 
-    const teacherName = await prisma.user.findUnique({
-        where: { id: test?.createdBy },
-        select: { name: true }
-    })
-
+    // If test doesn't exist, show 404
     if (!test) {
-        console.log("no test found")
-        return notFound()
+        console.log("No test found");
+        return notFound();
     }
-    return (
-        <TestPage test={test} teacherName={teacherName?.name}/>
-    )
+
+    // Now we safely fetch the teacher
+    const teacher = test.createdBy
+        ? await prisma.user.findUnique({
+              where: { id: test.createdBy },
+              select: { name: true },
+          })
+        : null;
+
+    const teacherName = teacher?.name || "Anonymous";
+
+    return <TestPage test={test} teacherName={teacherName} />;
 }
