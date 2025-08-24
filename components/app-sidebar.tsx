@@ -2,16 +2,9 @@
 
 import * as React from "react"
 import {
-  AudioWaveform,
-  Command ,
+  
   LayoutDashboard, FileQuestion, ListChecks,
-  BookCheck,
-  Frame,
-  GalleryVerticalEnd,
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
+  BookOpenCheck,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -29,8 +22,8 @@ import { useSession } from "next-auth/react"
 
 const team = {
       name: "SnapTest",
-      logo: BookCheck,
-      plan: "Free",
+      logo: BookOpenCheck,
+      plan: "Create, share, challenge.",
     }
 
 // This is sample data.

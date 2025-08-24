@@ -1,4 +1,4 @@
-import { GalleryVerticalEnd } from "lucide-react"
+import { BookOpenCheck, GalleryVerticalEnd } from "lucide-react"
 
 import { LoginForm } from "@/components/login-form"
 import { auth } from "@/auth"
@@ -15,10 +15,10 @@ export default async function LoginPage() {
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex justify-center gap-2 md:justify-start">
           <a href="#" className="flex items-center gap-2 font-medium">
-            <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
-              <GalleryVerticalEnd className="size-4" />
+            <div className="flex size-6 items-center justify-center rounded-md">
+             <BookOpenCheck />
             </div>
-            Acme Inc.
+            <span className="text-2xl font-semibold">SnapTest</span>
           </a>
         </div>
         <div className="flex flex-1 items-center justify-center">

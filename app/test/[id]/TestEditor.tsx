@@ -46,7 +46,7 @@ interface Question {
 }
 
 type status = "DRAFT" | "PUBLISHED" | "BLOCKED"
-const maxQuestions = 20
+const maxQuestions = 10
 
 
 interface TestState {
@@ -405,9 +405,9 @@ export default function TestEditor({ test }: { test: any }) {
                                 <Save />
                             </Button>
                             {status === "PUBLISHED" && <><ShareUrlDialog open={open} onOpenChange={setOpen} url={`${window.location.origin}/attempt/${test.id}`}><Button variant="ghost" disabled={saveLoading || publishLoading || aiLoading}>
-                                <Share2 size={8} />
+                                <Share2 size={8} /> 
                             </Button></ShareUrlDialog>
-
+                                                
                             </>}
 
                             <DropdownMenu>
@@ -489,9 +489,9 @@ export default function TestEditor({ test }: { test: any }) {
                                     </DropdownMenuItem>
                                     <Separator />
                                     {status === "PUBLISHED" && <><ShareUrlDialog open={open} onOpenChange={setOpen} url={`${window.location.origin}/attempt/${test.id}`}><Button variant="ghost" disabled={saveLoading || publishLoading || aiLoading}>
-                                        <Share2 size={8} />
+                                       Share <Share2 size={8} /> 
                                     </Button></ShareUrlDialog>
-
+                                    <Separator />
                                     </>}
 
                                     {status === "PUBLISHED" ? (
@@ -540,7 +540,7 @@ export default function TestEditor({ test }: { test: any }) {
                                     variant="outline"
                                     size="sm"
                                     onClick={() => dispatch({ type: "ADD_NEW_QUESTION" })}
-                                    className="absolute right-[150px] md:right-[-60px] bottom-[20px] md:top-1/2 md:-translate-y-1/2 h-10 px-4 rounded-full shadow-md z-10 bg-background border-2 hover:bg-accent text-xs"
+                                    className="absolute right-[150px] sm:right-[-20px] md:right-[-60px] bottom-[20px] md:top-1/2 md:-translate-y-1/2 h-10 px-4 rounded-full shadow-md z-10 bg-background border-2 hover:bg-accent text-xs"
                                 >
                                     <Plus className="h-4 w-4 mr-1" />
                                     New
@@ -551,7 +551,7 @@ export default function TestEditor({ test }: { test: any }) {
                                     size="sm"
                                     onClick={() => dispatch({ type: "GO_TO_NEXT_QUES" })}
                                     disabled={currentQuestionIndex === questions.length - 1}
-                                    className="absolute right-[150px] md:right-[-60px] bottom-[20px] md:top-1/2 md:-translate-y-1/2 h-10 w-10 p-0 rounded-full shadow-md z-10 bg-background border-2 hover:bg-accent disabled:opacity-30"
+                                    className="absolute right-[150px] sm:right-[-20px] md:right-[-60px] bottom-[20px] md:top-1/2 md:-translate-y-1/2 h-10 w-10 p-0 rounded-full shadow-md z-10 bg-background border-2 hover:bg-accent disabled:opacity-30"
                                 >
                                     <ChevronRight className="h-5 w-5" />
                                 </Button>
