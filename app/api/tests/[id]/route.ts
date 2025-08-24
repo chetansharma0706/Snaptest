@@ -45,7 +45,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 }
 
 
-export async function DELETE(req:Request , { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth()
     if (!session?.user?.id) {
@@ -53,6 +53,22 @@ export async function DELETE(req:Request , { params }: { params: Promise<{ id: s
     }
 
     const quizId = (await params).id
+
+    // 1. Delete AttemptAnswer linked to this quiz
+    await prisma.attemptAnswer.deleteMany({
+      where: { question: { quizId: quizId } }
+    });
+
+    // 2. Delete attempts of this quiz
+    await prisma.attempt.deleteMany({
+      where: { quizId: quizId }
+    });
+
+    // 3. Delete questions
+    await prisma.question.deleteMany({
+      where: { quizId: quizId }
+    });
+
 
     // Make sure the test belongs to the user
     const deletedTest = await prisma.quiz.deleteMany({

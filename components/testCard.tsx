@@ -66,12 +66,14 @@ export function TestCard({
   }
 
   const defaultIcon = <BookOpen className="h-5 w-5 text-primary" />
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+
 
   return (
     <Card
       className={`p-5 hover:shadow-md transition-all duration-200 cursor-pointer group rounded-2xl`}
     >
-      <ShareUrlDialog open={open} onOpenChange={setOpen} url={`${window.location.origin}/attempt/${id}`} />
+      <ShareUrlDialog open={open} onOpenChange={setOpen} url={`${origin}/attempt/${id}`} />
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         {/* Left Section */}
         <div className="flex items-start justify-center gap-3 sm:flex-1">

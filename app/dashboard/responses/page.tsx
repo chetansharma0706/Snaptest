@@ -8,7 +8,67 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-export default function Responses() {
+import { DataTable } from "./data-table"
+import { columns } from "./columns"
+import { prisma } from "@/lib/prisma"
+import { auth } from "@/auth"
+import { redirect } from "next/navigation"
+
+
+export default async function Responses() {
+    const session = await auth();
+
+    if (!session || !session?.user?.id) {
+        return redirect("/");
+    }
+
+    const fetchData = await prisma.quiz.findMany({
+        where:{
+            createdBy: session.user.id,
+            status:"PUBLISHED"
+        },
+        select:{
+            title:true,
+
+            attempts:{
+                select:{
+                    id:true,
+                    user:{
+                        select:{
+                            name:true,
+                            email:true,
+                            
+                        },
+                    score:true
+                    }
+                }
+            }
+        }
+    })
+
+    const data = [
+        {
+            id: "1",
+            name: "John Doe",
+            email: "john@example.com",
+            testTitle: "Math Test",
+            score: 85,
+        },
+        {
+            id: "2",
+            name: "Jane Smith",
+            email: "jane@example.com",
+            testTitle: "Science Test",
+            score: 92,
+        },
+        {
+            id: "3",
+            name: "Alice Johnson",
+            email: "alice@example.com",
+            testTitle: "History Test",
+            score: 78,
+        },
+    ]
     return (
         <>
             <header className="flex h-16 shrink-0 mt-1 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -31,13 +91,8 @@ export default function Responses() {
                     </Breadcrumb>
                 </div>
             </header>
-            <div className="flex flex-1 flex-col gap-4 p-4 pt-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="bg-muted/50 aspect-video rounded-xl" />
-                    <div className="bg-muted/50 aspect-video rounded-xl" />
-                    <div className="bg-muted/50 aspect-video rounded-xl" />
-                </div>
-                <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
+            <div className="container mx-auto py-10 px-10">
+                <DataTable columns={columns} data={data} />
             </div>
         </>
     )

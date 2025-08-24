@@ -92,7 +92,7 @@ export function ShareUrlDialog({
               onClick={openInNewTab}
               className="w-full gap-2 hover:bg-secondary bg-transparent"
             >
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink className="h-4 w-4"  />
               Open in New Tab
             </Button>
           </div>

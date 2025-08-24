@@ -76,7 +76,7 @@ model Question {
   id      String          @id @default(cuid())
   text    String
   quizId  String
-  quiz    Quiz            @relation(fields: [quizId], references: [id])
+  quiz    Quiz            @relation(fields: [quizId], references: [id] , onDelete: Cascade)
   options Option[]        
   answers AttemptAnswer[]
   correctOptionIndex Int  @default(0)
@@ -97,7 +97,7 @@ model Attempt {
   quizId    String
   score     Int             @default(0)
   user      User            @relation("UserAttempts", fields: [userId], references: [id])
-  quiz      Quiz            @relation(fields: [quizId], references: [id])
+  quiz      Quiz            @relation(fields: [quizId], references: [id], onDelete: Cascade)
   answers   AttemptAnswer[]
   createdAt DateTime        @default(now())
 }
@@ -107,7 +107,7 @@ model AttemptAnswer {
   attemptId  String
   questionId String
   optionId   String
-  attempt    Attempt  @relation(fields: [attemptId], references: [id])
+  attempt    Attempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
   question   Question @relation(fields: [questionId], references: [id])
   option     Option   @relation(fields: [optionId], references: [id])
 }
