@@ -1,9 +1,9 @@
 "use client"
 
-import { Dispatch, useEffect } from "react"
+import { Dispatch, useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { CheckCircle, Clock, Award, ChevronLeft, ChevronRight, Users } from "lucide-react"
+import { CheckCircle, Clock, Award, ChevronLeft, ChevronRight, Users, Loader2 } from "lucide-react"
 import { OptionType, QuestionType } from "@/lib/utils"
 import { Action } from "@/app/attempt/[id]/TestPage"
 
@@ -16,6 +16,8 @@ interface ActiveTestScreenProps {
   selectedAnswers: Map<string, OptionType>;
   secondsRemaining: number | null;
   teacherName: string | null | undefined;
+  handleAttempt: () => Promise<void>;
+  loadingSubmit: boolean;
 }
 
 export default function ActiveTestScreen({
@@ -26,8 +28,11 @@ export default function ActiveTestScreen({
   score,
   selectedAnswers,
   secondsRemaining,
-  teacherName
+  teacherName,
+  handleAttempt,
+  loadingSubmit
 }: ActiveTestScreenProps) {
+
 
   const currentQuestion = questions[index];
   const totalQuestions = questions.length;
@@ -67,9 +72,10 @@ export default function ActiveTestScreen({
     dispatch({ type: 'prevQues' });
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (index === totalQuestions - 1) {
       // Last question - submit
+      await handleAttempt()
       dispatch({ type: 'endQuiz' });
     } else {
       dispatch({ type: 'nextQues' });
@@ -226,11 +232,12 @@ export default function ActiveTestScreen({
 
                 <Button
                   onClick={handleNext}
+                  disabled={loadingSubmit}
                   className="px-4 py-2 md:px-6 text-sm md:text-base"
                   variant={index === totalQuestions - 1 ? "default" : "default"}
                 >
-                  {index === totalQuestions - 1 ? "Submit Test" : "Next"}
-                  {index !== totalQuestions - 1 && <ChevronRight className="w-4 h-4 ml-1" />}
+                  {index === totalQuestions - 1 ? loadingSubmit ? "Submitting..." : "Submit Test" : "Next"}
+                  {index === totalQuestions - 1 ? loadingSubmit && <Loader2 className="w-4 h-4 ml-1 animate-spin" /> : <ChevronRight className="w-4 h-4 ml-1" />}
                 </Button>
               </div>
             </Card>

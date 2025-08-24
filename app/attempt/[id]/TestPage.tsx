@@ -3,7 +3,9 @@
 import ActiveTestScreen from "@/components/ActiveTestScreen";
 import { TestStartInterface } from "@/components/TestStartScreen";
 import { OptionType, QuestionType } from "@/lib/utils";
-import { useReducer, useEffect, useCallback, useRef } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useReducer, useEffect, useCallback, useRef, useState } from "react";
 
 type TestState = {
   status: 'none' | 'ready' | 'active' | 'error' | 'finished';
@@ -134,6 +136,7 @@ export default function TestPage({
   test: any;
   teacherName: string | null | undefined;
 }) {
+  const [loading, setLoading] = useState(false);
   const initialState: TestState = {
     questions: test.questions,
     status: "ready",
@@ -143,14 +146,96 @@ export default function TestPage({
     secondsRemaining: test.timeLimit ? test.timeLimit * 60 : null,
   };
 
+  const router = useRouter();
+
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
+
   const [state, dispatch] = useReducer(reducer, initialState);
   const { questions, status, index, score, selectedAnswers, secondsRemaining } = state;
 
   const initialTimeLimit = test.timeLimit ? test.timeLimit * 60 : null;
 
-  // Refs to track focus state
+const handleAttempt = async () => {
+  if (!window.confirm("Are you sure you want to submit the test?")) return;
+
+  try {
+    setLoading(true);
+
+    // Step 1: Create attempt
+    const response = await fetch('/api/attempts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ quizId: test.id, userId })
+    });
+
+    if (!response.ok) {
+      console.error('Failed to record attempt');
+      dispatch({type:"error"})
+      return;
+    }
+
+    const attempt = await response.json();
+
+    // Step 2: Save answers
+    const secondRes = await fetch(`/api/attempts/${attempt.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        quizId: test.id,
+        userId,
+        answers: Array.from(selectedAnswers.entries()).map(([questionId, option]) => ({
+          attemptId: attempt.id,
+          questionId,
+          optionId: option.id,
+        })),
+        score,
+      })
+    });
+
+    if (!secondRes.ok) {
+      console.error('Failed to record answers');
+      dispatch({type:"error"})
+      return;
+    }
+
+    console.log('Answers recorded successfully');
+    router.push(`/attempt/thanks/${attempt.id}`);
+    
+  } catch (error) {
+    console.error('Error occurred while recording attempt:', error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+  // Refs to track focus state and timers
   const isTabFocusedRef = useRef(true);
-  const hasLeftTabRef = useRef(false);
+  const resetTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Function to clear the reset timer
+  const clearResetTimer = useCallback(() => {
+    if (resetTimerRef.current) {
+      clearTimeout(resetTimerRef.current);
+      resetTimerRef.current = null;
+      console.log('Reset timer cleared - user returned within 5 seconds');
+    }
+  }, []);
+
+  // Function to start the reset timer
+  const startResetTimer = useCallback(() => {
+    if (status !== 'active') return;
+    
+    // Clear any existing timer first
+    clearResetTimer();
+    
+    console.log('Starting 5-second reset timer...');
+    resetTimerRef.current = setTimeout(() => {
+      console.log('5 seconds elapsed - Resetting test');
+      dispatch({ type: 'resetQuiz', payload: { timeLimit: initialTimeLimit } });
+      resetTimerRef.current = null;
+    }, 5000); // 5 seconds
+  }, [status, clearResetTimer, initialTimeLimit]);
 
   // Tab switching and focus detection
   const handleVisibilityChange = useCallback(() => {
@@ -159,34 +244,31 @@ export default function TestPage({
     if (document.hidden) {
       // User switched away from tab
       isTabFocusedRef.current = false;
-      hasLeftTabRef.current = true;
-      console.log('Tab switched away - Test will be reset');
-      dispatch({ type: 'resetQuiz', payload: { timeLimit: initialTimeLimit } });
+      console.log('Tab switched away - Starting 5-second timer');
+      startResetTimer();
     } else {
       // User returned to tab
       isTabFocusedRef.current = true;
+      console.log('Tab is now visible - Clearing timer');
+      clearResetTimer();
     }
-  }, [status]);
+  }, [status, startResetTimer, clearResetTimer]);
 
   const handleWindowFocus = useCallback(() => {
     if (status !== 'active') return;
 
-    if (hasLeftTabRef.current) {
-      // User returned after leaving - reset test
-      console.log('Window focus returned after leaving - Test reset');
-      dispatch({ type: 'resetQuiz', payload: { timeLimit: initialTimeLimit } });
-    }
     isTabFocusedRef.current = true;
-  }, [status]);
+    console.log('Window gained focus - Clearing timer');
+    clearResetTimer();
+  }, [status, clearResetTimer]);
 
   const handleWindowBlur = useCallback(() => {
     if (status !== 'active') return;
 
     isTabFocusedRef.current = false;
-    hasLeftTabRef.current = true;
-    console.log('Window lost focus - Test will be reset');
-    dispatch({ type: 'resetQuiz', payload: { timeLimit: initialTimeLimit } });
-  }, [status]);
+    console.log('Window lost focus - Starting 5-second timer');
+    startResetTimer();
+  }, [status, startResetTimer]);
 
   // Prevent common cheating methods
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -204,7 +286,7 @@ export default function TestPage({
       e.preventDefault();
       dispatch({ type: 'resetQuiz', payload: { timeLimit: initialTimeLimit } });
     }
-  }, [status]);
+  }, [status, initialTimeLimit]);
 
   const handleContextMenu = useCallback((e: MouseEvent) => {
     if (status === 'active') {
@@ -216,8 +298,8 @@ export default function TestPage({
   useEffect(() => {
     if (status === 'active') {
       // Reset tracking when test becomes active
-      hasLeftTabRef.current = false;
       isTabFocusedRef.current = true;
+      clearResetTimer(); // Clear any existing timers
 
       // Add event listeners for tab switching detection
       document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -232,9 +314,15 @@ export default function TestPage({
         window.removeEventListener('blur', handleWindowBlur);
         window.removeEventListener('keydown', handleKeyDown);
         window.removeEventListener('contextmenu', handleContextMenu);
+        
+        // Clear timer when component unmounts or status changes
+        clearResetTimer();
       };
+    } else {
+      // Clear timer when test is not active
+      clearResetTimer();
     }
-  }, [status, handleVisibilityChange, handleWindowFocus, handleWindowBlur, handleKeyDown, handleContextMenu]);
+  }, [status, handleVisibilityChange, handleWindowFocus, handleWindowBlur, handleKeyDown, handleContextMenu, clearResetTimer]);
 
   // Timer effect
   useEffect(() => {
@@ -254,9 +342,6 @@ export default function TestPage({
     }
   }, [secondsRemaining, status]);
 
-  console.log('Current score:', score);
-  console.log('Selected answers:', Array.from(selectedAnswers.entries()));
-
   return (
     <>
       {status === "ready" && (
@@ -274,7 +359,7 @@ export default function TestPage({
         <div>
           {/* Warning Banner */}
           <div className="bg-red-600 text-white p-3 text-center text-sm font-medium">
-            ⚠️ WARNING: Do not switch tabs, minimize window, or leave this page. The test will be reset if you do.
+            ⚠️ WARNING: Do not switch tabs, minimize window, or leave this page for more than 5 seconds. The test will be reset if you do.
           </div>
 
           <ActiveTestScreen
@@ -286,33 +371,18 @@ export default function TestPage({
             selectedAnswers={selectedAnswers}
             secondsRemaining={secondsRemaining}
             teacherName={teacherName}
+            handleAttempt={handleAttempt}
+            loadingSubmit={loading}
           />
-        </div>
-      )}
-
-      {status === "finished" && (
-        <div className="min-h-screen flex items-center justify-center p-4">
-          <div className="max-w-2xl w-full text-center bg-white rounded-lg shadow-lg p-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Test Completed!</h1>
-            <p className="text-xl text-gray-600 mb-4">
-              Your Score: {score} out of {questions.length}
-            </p>
-            <p className="text-lg text-gray-500 mb-6">
-              {Math.round((score / questions.length) * 100)}% Correct
-            </p>
-            <div className="text-sm text-gray-400">
-              Answered: {selectedAnswers.size} of {questions.length} questions
-            </div>
-          </div>
         </div>
       )}
 
       {status === "error" && (
         <div className="min-h-screen flex items-center justify-center p-4">
           <div className="max-w-md w-full text-center bg-red-50 rounded-lg p-8">
-            <h1 className="text-2xl font-bold text-red-900 mb-4">Test Reset</h1>
+            <h1 className="text-2xl font-bold text-red-900 mb-4">Something went wrong</h1>
             <p className="text-red-700 mb-4">
-              The test has been reset because you switched tabs or left the page.
+              There was an error processing your request. Please attempt to submit your answers again.
             </p>
             <button
               onClick={() => dispatch({ type: 'resetQuiz' })}

@@ -39,12 +39,12 @@ export function TeamSwitcher({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
-                <team.logo className="size-4" />
+              <div className="flex aspect-square size-7 items-center justify-center rounded-lg">
+                <team.logo className="size-8" />
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{team.name}</span>
-                <span className="truncate text-xs">{team.plan}</span>
+              <div className="grid flex-1 text-left text-xl leading-tight">
+                <span className="truncate font-medium mb-1">{team.name}</span>
+                {/* <span className="truncate text-[8px]">{team.plan}</span> */}
               </div>
             </SidebarMenuButton>
         </DropdownMenu>

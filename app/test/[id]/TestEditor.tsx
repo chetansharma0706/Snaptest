@@ -275,8 +275,9 @@ export default function TestEditor({ test }: { test: any }) {
             })
 
             if (response.ok) {
-                if(type === "PUBLISH"){
-                alert("Test Published Successfully!")}else{
+                if (type === "PUBLISH") {
+                    alert("Test Published Successfully!")
+                } else {
                     alert("Test Unpublished Successfully!")
                 }
             } else {
@@ -287,7 +288,7 @@ export default function TestEditor({ test }: { test: any }) {
             console.error("Something went wrong", error)
         } finally {
             dispatch({ type: "SET_PUB_LOADING", payload: false })
-            if(type === "PUBLISH") return setOpen(true)
+            if (type === "PUBLISH") return setOpen(true)
 
         }
     }
@@ -405,14 +406,14 @@ export default function TestEditor({ test }: { test: any }) {
                                 <Save />
                             </Button>
                             {status === "PUBLISHED" && <><ShareUrlDialog open={open} onOpenChange={setOpen} url={`${window.location.origin}/attempt/${test.id}`}><Button variant="ghost" disabled={saveLoading || publishLoading || aiLoading}>
-                                <Share2 size={8} /> 
+                                <Share2 size={8} />
                             </Button></ShareUrlDialog>
-                                                
+
                             </>}
 
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild disabled={publishLoading}>
-                                    {publishLoading ? <Loader2 className="animate-spin h-6 w-6" /> :<EllipsisVertical size={20}/>}
+                                    {publishLoading ? <Loader2 className="animate-spin h-6 w-6" /> : <EllipsisVertical size={20} />}
 
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent>
@@ -489,9 +490,9 @@ export default function TestEditor({ test }: { test: any }) {
                                     </DropdownMenuItem>
                                     <Separator />
                                     {status === "PUBLISHED" && <><ShareUrlDialog open={open} onOpenChange={setOpen} url={`${window.location.origin}/attempt/${test.id}`}><Button variant="ghost" disabled={saveLoading || publishLoading || aiLoading}>
-                                       Share <Share2 size={8} /> 
+                                        Share <Share2 size={8} />
                                     </Button></ShareUrlDialog>
-                                    <Separator />
+                                        <Separator />
                                     </>}
 
                                     {status === "PUBLISHED" ? (
@@ -523,42 +524,82 @@ export default function TestEditor({ test }: { test: any }) {
                 <>
                     <main className="flex-1 px-6 py-8">
                         <div className="max-w-4xl mx-auto relative">
-                            {/* Left Navigation Arrow */}
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => dispatch({ type: "GO_TO_PREV_QUES" })}
-                                disabled={currentQuestionIndex === 0}
-                                className="absolute left-[150px] md:left-[-60px] bottom-[20px] md:top-1/2 md:-translate-y-1/2  h-10 w-10 p-0 rounded-full shadow-md z-10 bg-background border-2 hover:bg-accent disabled:opacity-30"
-                            >
-                                <ChevronLeft className="h-5 w-5" />
-                            </Button>
+                            {/* === Side Arrows (md+ only) === */}
+                            <div className="hidden lg:block">
+                                {/* Left Arrow */}
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => dispatch({ type: "GO_TO_PREV_QUES" })}
+                                    disabled={currentQuestionIndex === 0}
+                                    className="absolute left-[-60px] top-1/2 -translate-y-1/2 h-10 w-10 p-0 rounded-full shadow-md z-10 bg-background border-2 hover:bg-accent disabled:opacity-30"
+                                >
+                                    <ChevronLeft className="h-5 w-5" />
+                                </Button>
 
-                            {/* Right Navigation Arrow */}
-                            {currentQuestionIndex === questions.length - 1 && questions.length < maxQuestions ? (
+                                {/* Right Arrow */}
+                                {currentQuestionIndex === questions.length - 1 && questions.length < maxQuestions ? (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => dispatch({ type: "ADD_NEW_QUESTION" })}
+                                        className="absolute right-[-60px] top-1/2 -translate-y-1/2 h-10 px-4 rounded-full shadow-md z-10 bg-background border-2 hover:bg-accent text-xs"
+                                    >
+                                        <Plus className="h-4 w-4 mr-1" />
+                                        New
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => dispatch({ type: "GO_TO_NEXT_QUES" })}
+                                        disabled={currentQuestionIndex === questions.length - 1}
+                                        className="absolute right-[-60px] top-1/2 -translate-y-1/2 h-10 w-10 p-0 rounded-full shadow-md z-10 bg-background border-2 hover:bg-accent disabled:opacity-30"
+                                    >
+                                        <ChevronRight className="h-5 w-5" />
+                                    </Button>
+                                )}
+                            </div>
+
+                            {/* === Bottom Arrows (sm only) === */}
+                            <div className="absolute bottom-5 left-1/2 -translate-x-1/2  w-2/3 flex justify-between items-center lg:hidden">
+                                {/* Left Arrow */}
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => dispatch({ type: "ADD_NEW_QUESTION" })}
-                                    className="absolute right-[150px] sm:right-[-20px] md:right-[-60px] bottom-[20px] md:top-1/2 md:-translate-y-1/2 h-10 px-4 rounded-full shadow-md z-10 bg-background border-2 hover:bg-accent text-xs"
+                                    onClick={() => dispatch({ type: "GO_TO_PREV_QUES" })}
+                                    disabled={currentQuestionIndex === 0}
+                                    className="h-10 w-10 p-0 rounded-full shadow-md bg-background border-2 hover:bg-accent disabled:opacity-30"
                                 >
-                                    <Plus className="h-4 w-4 mr-1" />
-                                    New
+                                    <ChevronLeft className="h-5 w-5" />
                                 </Button>
-                            ) : (
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => dispatch({ type: "GO_TO_NEXT_QUES" })}
-                                    disabled={currentQuestionIndex === questions.length - 1}
-                                    className="absolute right-[150px] sm:right-[-20px] md:right-[-60px] bottom-[20px] md:top-1/2 md:-translate-y-1/2 h-10 w-10 p-0 rounded-full shadow-md z-10 bg-background border-2 hover:bg-accent disabled:opacity-30"
-                                >
-                                    <ChevronRight className="h-5 w-5" />
-                                </Button>
-                            )}
+
+                                {/* Right Arrow or Add */}
+                                {currentQuestionIndex === questions.length - 1 && questions.length < maxQuestions ? (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => dispatch({ type: "ADD_NEW_QUESTION" })}
+                                        className="h-10 px-4 rounded-full shadow-md bg-background border-2 hover:bg-accent text-xs"
+                                    >
+                                        <Plus className="h-4 w-4 mr-1" />
+                                        New
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => dispatch({ type: "GO_TO_NEXT_QUES" })}
+                                        disabled={currentQuestionIndex === questions.length - 1}
+                                        className="h-10 w-10 p-0 rounded-full shadow-md bg-background border-2 hover:bg-accent disabled:opacity-30"
+                                    >
+                                        <ChevronRight className="h-5 w-5" />
+                                    </Button>
+                                )}
+                            </div>
 
                             <Card className="border-0 shadow-sm">
-                                <CardContent className="p-8 mb-10 md:mb-0">
+                                <CardContent className="p-8 mb-10 lg:mb-0">
                                     <div className="space-y-6">
                                         {/* Question Number with Navigation */}
                                         <div className="flex items-center justify-between">
