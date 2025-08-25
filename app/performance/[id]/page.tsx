@@ -40,6 +40,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                   isCorrect: true, // ✅ this gives correct option info
                 },
               },
+              explanation: true, // ✅ include explanation field
             },
           },
         },

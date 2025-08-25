@@ -73,13 +73,14 @@ model Quiz {
 }
 
 model Question {
-  id      String          @id @default(cuid())
-  text    String
-  quizId  String
-  quiz    Quiz            @relation(fields: [quizId], references: [id] , onDelete: Cascade)
-  options Option[]        
-  answers AttemptAnswer[]
-  correctOptionIndex Int  @default(0)
+  id                 String          @id @default(cuid())
+  text               String
+  quizId             String
+  explanation        String?         @default("")
+  quiz               Quiz            @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  options            Option[]
+  answers            AttemptAnswer[]
+  correctOptionIndex Int             @default(0)
 }
 
 model Option {

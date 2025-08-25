@@ -28,6 +28,9 @@ export default async function Responses() {
         },
         select:{
             title:true,
+            questions:{
+                select:{id:true}
+            },
 
             attempts:{
                 select:{
@@ -50,7 +53,7 @@ export default async function Responses() {
             name: a.user?.name ?? "",
             email: a.user?.email ?? "",
             testTitle: quiz.title,
-            score: a.score,
+            score: `${a.score} / ${quiz.questions.length}`,
         }))
     );
 

@@ -43,6 +43,7 @@ interface Question {
     text: string
     options: Option[]
     correctOptionIndex: number
+    explanation?: string
 }
 
 type status = "DRAFT" | "PUBLISHED" | "BLOCKED"
@@ -57,21 +58,23 @@ interface TestState {
     status: status
     saveLoading: boolean
     currentQuestionIndex: number,
-    aiPrompt: string
-    aiLoading: boolean
     publishLoading: boolean
-
+    aiLoading: boolean
+    aiTopic: string
+    aiDifficulty: 'easy' | 'medium' | 'hard'
+    aiQuestionCount: number
+    aiSubject: string
+    aiGradeLevel: string
+    aiAdditionalContext: string
 }
 
 type Actions =
     | { type: "SET_TITLE"; payload: string }
     | { type: "SET_DESCRIPTION"; payload: string }
-    | { type: "SET_AI_PROMPT"; payload: string }
     | { type: "SET_TIME_LIMIT"; payload: number }
     | { type: "SET_STATUS"; payload: status }
     | { type: "SET_SAVE_LOADING"; payload: boolean }
     | { type: "SET_PUB_LOADING"; payload: boolean }
-    | { type: "SET_AI_LOADING"; payload: boolean }
     | { type: "SET_CURRENT_QUES_INDEX", payload: number }
     | { type: "SET_CURR_QUES"; payload: Partial<Question> }
     | { type: "SET_CURR_QUES_OPTION"; payload: { optionIndex: number; text: string } }
@@ -80,6 +83,15 @@ type Actions =
     | { type: "GO_TO_NEXT_QUES" }
     | { type: "GO_TO_PREV_QUES" }
     | { type: "DEL_QUES" }
+    | { type: "SET_QUESTIONS"; payload: Question[] }
+    // AI related
+    | { type: "SET_AI_LOADING"; payload: boolean }
+    | { type: "SET_AI_TOPIC"; payload: string }
+    | { type: "SET_AI_DIFFICULTY"; payload: 'easy' | 'medium' | 'hard' }
+    | { type: "SET_AI_QUESTION_COUNT"; payload: number }
+    | { type: "SET_AI_SUBJECT"; payload: string }
+    | { type: "SET_AI_GRADE_LEVEL"; payload: string }
+    | { type: "SET_AI_ADDITIONAL_CONTEXT"; payload: string }
 
 const sampleQues = [
     {
@@ -96,8 +108,6 @@ function reducer(state: TestState, actions: Actions): TestState {
             return { ...state, title: actions.payload }
         case "SET_DESCRIPTION":
             return { ...state, description: actions.payload }
-        case "SET_AI_PROMPT":
-            return { ...state, aiPrompt: actions.payload }
         case "SET_TIME_LIMIT":
             return { ...state, timeLimit: actions.payload }
         case "SET_STATUS":
@@ -108,8 +118,22 @@ function reducer(state: TestState, actions: Actions): TestState {
             return { ...state, publishLoading: actions.payload }
         case "SET_AI_LOADING":
             return { ...state, aiLoading: actions.payload }
+        case "SET_AI_TOPIC":
+            return { ...state, aiTopic: actions.payload }
+        case "SET_AI_DIFFICULTY":
+            return { ...state, aiDifficulty: actions.payload }
+        case "SET_AI_QUESTION_COUNT":
+            return { ...state, aiQuestionCount: actions.payload }
+        case "SET_AI_SUBJECT":
+            return { ...state, aiSubject: actions.payload }
+        case "SET_AI_GRADE_LEVEL":
+            return { ...state, aiGradeLevel: actions.payload }
+        case "SET_AI_ADDITIONAL_CONTEXT":
+            return { ...state, aiAdditionalContext: actions.payload }
         case "SET_CURRENT_QUES_INDEX":
             return { ...state, currentQuestionIndex: actions.payload }
+        case "SET_QUESTIONS":
+            return { ...state, questions: actions.payload }    
         case "SET_CURR_QUES": {
             const updatedQuestions = state.questions.map((q, index) =>
                 index === state.currentQuestionIndex ? { ...q, ...actions.payload } : q
@@ -185,7 +209,7 @@ function reducer(state: TestState, actions: Actions): TestState {
 
 export default function TestEditor({ test }: { test: any }) {
     const [open, setOpen] = useState(false)
-
+    const [aiDialogOpen, setAiDialogOpen] = useState(false)
     const router = useRouter();
 
     console.log(test.status)
@@ -198,20 +222,28 @@ export default function TestEditor({ test }: { test: any }) {
         status: test.status,
         saveLoading: false,
         currentQuestionIndex: 0,
-        aiPrompt: "",
+        publishLoading: false,
+        // AI related
         aiLoading: false,
-        publishLoading: false
+        aiTopic: "",
+        aiDifficulty: "medium",
+        aiQuestionCount: 1,
+        aiSubject: "",
+        aiGradeLevel: "",
+        aiAdditionalContext: ""
     }
 
 
     const [state, dispatch] = useReducer(reducer, intialState)
-    const { title, description, questions, saveLoading, publishLoading, currentQuestionIndex, timeLimit, status, aiPrompt, aiLoading } = state
+    const { title, description, questions, saveLoading, publishLoading, currentQuestionIndex, timeLimit, status,
+        // AI related
+        aiLoading, aiTopic, aiSubject, aiGradeLevel, aiDifficulty, aiQuestionCount, aiAdditionalContext } = state
 
     console.log(test)
 
     const currentQuestion = questions[currentQuestionIndex]
 
-    function cleanQuestions(questions: any[]) {
+    function cleanQuestions(questions: Question[]) {
         return questions.filter(q => {
             // Check for empty question text
             if (!q.text || q.text.trim() === "") return false;
@@ -233,6 +265,59 @@ export default function TestEditor({ test }: { test: any }) {
         questions: cleanedQuestions,
         timeLimit: timeLimit,
         status: status,
+    }
+
+    const generateAiQues = async () => {
+        dispatch({ type: "SET_AI_LOADING", payload: true })
+        setAiDialogOpen(false)
+        try {
+            const response = await fetch('/api/generate-questions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    topic: aiTopic,
+                    difficulty: aiDifficulty,
+                    questionCount: aiQuestionCount,
+                    subject: aiSubject,
+                    gradeLevel: aiGradeLevel,
+                    additionalContext: aiAdditionalContext
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log(data)
+                const generatedQuestions = data.questions.map((q: any) => ({
+                    id: uuidv4(),
+                    text: q.question,
+                    options: q.options.map((opt: string) => ({ text: opt })),
+                    correctOptionIndex: q.correctAnswer - 1,
+                    explanation: q.explanation || ""
+                }))
+
+                // Merge with existing questions but limit to maxQuestions
+                const combinedQuestions = [...cleanedQuestions, ...generatedQuestions].slice(0, maxQuestions)
+
+                dispatch({ type: "SET_QUESTIONS", payload: combinedQuestions })
+                // Update the questions in state
+                dispatch({ type: "SET_AI_LOADING", payload: false })
+                dispatch({ type: "SET_AI_TOPIC", payload: "" })
+                dispatch({ type: "SET_AI_SUBJECT", payload: "" })
+                dispatch({ type: "SET_AI_GRADE_LEVEL", payload: "" })
+                dispatch({ type: "SET_AI_QUESTION_COUNT", payload: 1 })
+                dispatch({ type: "SET_AI_ADDITIONAL_CONTEXT", payload: "" })
+
+            } else {
+                console.error('Failed to generate questions');
+                alert("Something went wrong. Please try again.")
+            }
+        } catch (error) {
+            console.error('Error generating questions:', error);
+            alert("Error generating questions. Please try again.")
+        } finally {
+            dispatch({ type: "SET_AI_LOADING", payload: false })
+            setOpen(false)
+        }
     }
 
     async function handleSave() {
@@ -359,15 +444,10 @@ export default function TestEditor({ test }: { test: any }) {
                             </DialogContent>
                         </Dialog>
                     </div>
+                    
 
                     <div className="flex items-center gap-3">
-                        {/* Desktop: show buttons normally */}
-                        <div className="hidden sm:flex items-center gap-3">
-                            <Button onClick={() => dispatch({ type: "SET_AI_LOADING", payload: !aiLoading })}>
-                                Start AI
-                            </Button>
-
-                            <Dialog>
+                          <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
                                 <DialogTrigger asChild>
                                     <Button size="sm" disabled={aiLoading}>
                                         AI <Sparkles size={12} />
@@ -382,19 +462,88 @@ export default function TestEditor({ test }: { test: any }) {
                                             Save time—AI will generate questions in seconds.
                                         </DialogDescription>
                                     </DialogHeader>
+
+                                    {/* AI Form */}
+                                    <div className="grid gap-4">
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="ai-topic">Topic</Label>
+                                            <Input
+                                                id="ai-topic"
+                                                name="ai-topic"
+                                                placeholder="e.g. Photosynthesis"
+                                                value={aiTopic}
+                                                onChange={(e) => dispatch({ type: "SET_AI_TOPIC", payload: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="ai-grade-level">Grade Level</Label>
+                                            <Input
+                                                id="ai-grade-level"
+                                                name="ai-grade-level"
+                                                placeholder="e.g. 7"
+                                                value={aiGradeLevel}
+                                                onChange={(e) => dispatch({ type: "SET_AI_GRADE_LEVEL", payload: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="ai-difficulty">Difficulty</Label>
+                                            <Select
+                                                name="ai-difficulty"
+                                                value={aiDifficulty}
+                                                onValueChange={(value) => dispatch({ type: "SET_AI_DIFFICULTY", payload: value as 'easy' | 'medium' | 'hard' })}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select difficulty" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="easy">Easy</SelectItem>
+                                                    <SelectItem value="medium">Medium</SelectItem>
+                                                    <SelectItem value="hard">Hard</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="ai-question-count">Number of Questions</Label>
+                                            <Input
+                                                id="ai-question-count"
+                                                name="ai-question-count"
+                                                type="number"
+                                                min={1}
+                                                max={Math.min(5, maxQuestions - questions.length > 0 ? maxQuestions - questions.length : 1)}
+                                                value={aiQuestionCount}
+                                                onChange={(e) => {
+                                                    let value = Number(e.target.value);
+                                                    const maxAllowed = Math.min(5, maxQuestions - questions.length > 0 ? maxQuestions - questions.length : 1);
+                                                    if (isNaN(value) || value < 1) value = 1;
+                                                    if (value > maxAllowed) value = maxAllowed;
+                                                    dispatch({ type: "SET_AI_QUESTION_COUNT", payload: value });
+                                                }}
+                                                inputMode="numeric"
+                                                pattern="[0-9]*"
+                                            />
+                                            <span className="text-xs text-muted-foreground">
+                                                Max: {maxQuestions - questions.length > 0 ? maxQuestions - questions.length : 1}
+                                            </span>
+                                        </div>
+                                    </div>
                                     <div className="grid gap-4">
                                         <Textarea
                                             id="aiprompt"
                                             name="aiprompt"
                                             placeholder="Describe your topic and let AI build a quiz for you."
-                                            value={aiPrompt}
-                                            onChange={(e) => dispatch({ type: "SET_AI_PROMPT", payload: e.target.value })}
+                                            value={aiAdditionalContext}
+                                            onChange={(e) => dispatch({ type: "SET_AI_ADDITIONAL_CONTEXT", payload: e.target.value })}
                                             className="h-30"
                                         />
                                     </div>
+                                    <DialogFooter>
+                                        <Button disabled={aiTopic.trim() === "" || aiLoading} onClick={generateAiQues}>{aiLoading ? <>Generating... <Loader2 className="animate-spin h-4 w-4" /></> : "Generate Questions"}</Button>
+                                    </DialogFooter>
                                 </DialogContent>
                             </Dialog>
-
+                        {/* Desktop: show buttons normally */}
+                        <div className="hidden sm:flex items-center gap-3">
+                        
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -447,39 +596,6 @@ export default function TestEditor({ test }: { test: any }) {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => dispatch({ type: "SET_AI_LOADING", payload: !aiLoading })}>
-                                        Start AI
-                                    </DropdownMenuItem>
-                                    <Separator />
-                                    <DropdownMenuItem>
-                                        <Dialog>
-                                            <DialogTrigger className='flex items-center gap-2'>
-                                                AI <Sparkles size={5} />
-                                            </DialogTrigger>
-                                            <DialogContent className="sm:max-w-[425px]">
-                                                <DialogHeader>
-                                                    <DialogTitle className="flex gap-2">
-                                                        Create Test with AI <Sparkles size={15} />
-                                                    </DialogTitle>
-                                                    <DialogDescription>
-                                                        Save time—AI will generate questions in seconds.
-                                                    </DialogDescription>
-                                                </DialogHeader>
-                                                <div className="grid gap-4">
-                                                    <Textarea
-                                                        id="aiprompt"
-                                                        name="aiprompt"
-                                                        placeholder="Describe your topic and let AI build a quiz for you."
-                                                        value={aiPrompt}
-                                                        onChange={(e) => dispatch({ type: "SET_AI_PROMPT", payload: e.target.value })}
-                                                        className="h-30"
-                                                    />
-                                                </div>
-                                            </DialogContent>
-                                        </Dialog>
-                                    </DropdownMenuItem>
-                                    <Separator />
-
                                     <DropdownMenuItem
                                         disabled={questions.length < 1 || saveLoading || publishLoading || aiLoading}
                                         onClick={handleSave}

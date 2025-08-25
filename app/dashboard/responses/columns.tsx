@@ -15,7 +15,7 @@ export type Response = {
     name: string
     email: string
     testTitle: string
-    score: number
+    score: string
 }
 
 export const columns: ColumnDef<Response>[] = [

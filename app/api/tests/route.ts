@@ -21,7 +21,6 @@ export async function POST(request: Request) {
         title: data.title,
         description: data.description,
         createdBy: session.user.id, // must exist in User table!
-        timeLimit: data.timeLimit ? parseInt(data.timeLimit, 10) : null,
       },
     });
 

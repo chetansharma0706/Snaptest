@@ -25,7 +25,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             options: {
               create: q.options.map((opt: any, idx: number) => ({ text: opt.text, isCorrect: idx === q.correctOptionIndex })),
             },
-            correctOptionIndex: q.correctOptionIndex
+            correctOptionIndex: q.correctOptionIndex,
+            explanation: q.explanation,
           })),
         },
       },

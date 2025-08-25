@@ -75,23 +75,7 @@ export default function DialogModal({
                             </div>
 
 
-                            {/* Time Limit Dropdown */}
-                            <div className="grid gap-2">
-                                <Label htmlFor="timelimit">Time Limit</Label>
-                                <Select name="timeLimit">
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select time limit" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {Array.from({ length: 12 }, (_, i) => (i + 1) * 5).map((min) => (
-                                            <SelectItem key={min} value={min.toString()}>
-                                                {min} minutes
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
+                          
                             <DialogFooter>
                                 <DialogClose asChild>
                                     <Button variant="outline">Cancel</Button>

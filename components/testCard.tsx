@@ -110,7 +110,7 @@ export function TestCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              {onEdit && (
+              {(onEdit && nResponses === 0) && (
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation()
@@ -121,6 +121,7 @@ export function TestCard({
                   Edit Test
                 </DropdownMenuItem>
               )}
+
               {status === "PUBLISHED" && (
                 <DropdownMenuItem
                   onClick={(e) => {

@@ -16,6 +16,7 @@ interface Question {
   id: string
   text: string
   options: Option[]
+  explanation?: string
 }
 
 interface Answer {
@@ -192,7 +193,7 @@ export default function PerformanceReport({ data }: PerformanceReportProps) {
       </Card>
 
       {/* Detailed Results */}
-      <Card>
+      <Card className="mb-4">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
@@ -205,9 +206,10 @@ export default function PerformanceReport({ data }: PerformanceReportProps) {
               const answer = data.answers.find((ans) => ans.questionId === question.id)
               const isCorrect = answer ? answer.option.isCorrect : false
               const correctOption = question.options.find((opt) => opt.isCorrect)
+              const explanation =  question.explanation === "" || question.explanation === undefined ? "No explanation provided." : question.explanation
 
               return (
-                <div key={question.id} className="p-6">
+                <div key={question.id} className="p-6 mb-4">
                   <div className="flex items-start gap-4">
                     <div className="flex-shrink-0">
                       {isCorrect ? (
@@ -291,6 +293,9 @@ export default function PerformanceReport({ data }: PerformanceReportProps) {
                           })}
                         </div>
                       </div>
+                      <div className="mt-4">
+                        <p className="text-sm font-medium text-muted-foreground mb-1">Explanation: {explanation}</p>
+                        </div>
                     </div>
                   </div>
                 </div>
