@@ -39,36 +39,22 @@ export default async function Responses() {
                             email:true,
                             
                         },
+                    },
                     score:true
-                    }
                 }
             }
         }
     })
+    const data = fetchData.flatMap(quiz =>
+        quiz.attempts.map(a => ({
+            id: a.id,
+            name: a.user?.name ?? "",
+            email: a.user?.email ?? "",
+            testTitle: quiz.title,
+            score: a.score,
+        }))
+    );
 
-    const data = [
-        {
-            id: "1",
-            name: "John Doe",
-            email: "john@example.com",
-            testTitle: "Math Test",
-            score: 85,
-        },
-        {
-            id: "2",
-            name: "Jane Smith",
-            email: "jane@example.com",
-            testTitle: "Science Test",
-            score: 92,
-        },
-        {
-            id: "3",
-            name: "Alice Johnson",
-            email: "alice@example.com",
-            testTitle: "History Test",
-            score: 78,
-        },
-    ]
     return (
         <>
             <header className="flex h-16 shrink-0 mt-1 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
