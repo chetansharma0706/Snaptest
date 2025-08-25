@@ -44,7 +44,7 @@ export const columns: ColumnDef<Response>[] = [
                 <Button
               variant="ghost"
               size="sm"
-              onClick={() => openInNewTab(`/dashboard/responses/${id}`)}
+              onClick={() => openInNewTab(`/performance/${id}`)}
               className="gap-2 hover:bg-secondary bg-transparent"
             >
               <ExternalLink className="h-4 w-4"  />
