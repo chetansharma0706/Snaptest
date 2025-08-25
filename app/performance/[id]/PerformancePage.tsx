@@ -72,7 +72,7 @@ export default function PerformanceReport({ data }: PerformanceReportProps) {
 
   const getScoreColor = (percentage: number) => {
     if (percentage >= 80) return "text-success"
-    if (percentage >= 60) return "text-accent"
+    if (percentage >= 60) return "text-foreground"
     return "text-destructive"
   }
 
@@ -91,7 +91,7 @@ export default function PerformanceReport({ data }: PerformanceReportProps) {
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
-          <Trophy className="h-8 w-8 text-accent" />
+          <Trophy className="h-8 w-8 text-foreground" />
           <h1 className="text-3xl font-bold text-foreground">Performance Report</h1>
         </div>
 
@@ -166,7 +166,7 @@ export default function PerformanceReport({ data }: PerformanceReportProps) {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
-              <Target className="h-5 w-5 text-accent" />
+              <Target className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-sm text-muted-foreground">Score</p>
                 <p className={cn("text-2xl font-bold", getScoreColor(scorePercentage))}>{scorePercentage}%</p>
