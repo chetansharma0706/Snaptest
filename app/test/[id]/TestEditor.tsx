@@ -32,7 +32,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger, DropdownMenu } from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
 import { ShareUrlDialog } from '@/components/ShareUrl';
-
+import {  toast } from 'react-toastify';
 
 interface Option {
     text: string
@@ -315,11 +315,11 @@ export default function TestEditor({ test }: { test: any }) {
 
             } else {
                 console.error('Failed to generate questions');
-                alert("Something went wrong. Please try again.")
+                toast.error("Something went wrong. Please try again.")
             }
         } catch (error) {
             console.error('Error generating questions:', error);
-            alert("Error generating questions. Please try again.")
+            toast.error("Error generating questions. Please try again.")
         } finally {
             dispatch({ type: "SET_AI_LOADING", payload: false })
             setOpen(false)
@@ -339,9 +339,9 @@ export default function TestEditor({ test }: { test: any }) {
             })
 
             if (response.ok) {
-                alert("Test Saved Successfully!")
+                toast.success("Test Saved Successfully!")
             } else {
-                console.log("Error in saving test")
+                toast.error("Something went wrong in saving test")
             }
 
         } catch (error) {
@@ -367,12 +367,12 @@ export default function TestEditor({ test }: { test: any }) {
 
             if (response.ok) {
                 if (type === "PUBLISH") {
-                    alert("Test Published Successfully!")
+                    toast.success("Test Published Successfully!")
                 } else {
-                    alert("Test Unpublished Successfully!")
+                    toast.success("Test Unpublished Successfully!")
                 }
             } else {
-                console.log("Something went wrong")
+                toast.error("Something went wrong")
             }
 
         } catch (error) {
@@ -387,6 +387,8 @@ export default function TestEditor({ test }: { test: any }) {
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
+            
+
             {/* Header */}
             <header className="border-b border-border px-6 py-4">
                 <div className="flex items-center justify-between max-w-6xl mx-auto">
@@ -395,7 +397,7 @@ export default function TestEditor({ test }: { test: any }) {
                         <Dialog>
                             {!aiLoading ?
                                 <DialogTrigger asChild>
-                                    <h2 className='font-semibold flex items-center gap-2 cursor-pointer'>{truncateText(title , 15)} <SquarePen size={15} /></h2>
+                                    <h2 className='font-semibold flex items-center gap-2 cursor-pointer'>{truncateText(title, 15)} <SquarePen size={15} /></h2>
                                 </DialogTrigger> : <Skeleton className='w-30 md:w-100 h-8' />}
                             <DialogContent className="sm:max-w-[425px]">
                                 <DialogHeader>

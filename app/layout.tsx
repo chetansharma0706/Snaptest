@@ -3,6 +3,8 @@ import { SessionProvider } from "next-auth/react"
 import { Geist, Geist_Mono, Poppins } from "next/font/google"
 import { ThemeProvider } from "next-themes"
 import "./globals.css"
+import {  ToastContainer } from 'react-toastify';
+
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -37,6 +39,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} antialiased`}
       >
+          <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="colored"/>
         <SessionProvider>
           <ThemeProvider
           attribute="class"
