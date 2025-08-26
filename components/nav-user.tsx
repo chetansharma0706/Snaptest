@@ -6,7 +6,9 @@ import {
   ChevronsUpDown,
   CreditCard,
   LogOut,
+  Moon,
   Sparkles,
+  Sun,
   SunMoon,
 } from "lucide-react"
 
@@ -67,7 +69,7 @@ export function NavUser({
 }: {
   user?: User
 }) {
-   const { theme, setTheme } = useTheme()
+  const { resolvedTheme, setTheme } = useTheme()
   const { isMobile } = useSidebar()
   if (!user) {
 
@@ -122,9 +124,23 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="cursor-pointer">
-                <SunMoon />
-                {theme === "dark" ? "Light Mode" : "Dark Mode"}
+              <DropdownMenuItem
+                onClick={() =>
+                  setTheme(resolvedTheme === "dark" ? "light" : "dark")
+                }
+                className="cursor-pointer flex items-center gap-2"
+              >
+                {resolvedTheme === "dark" ? (
+                  <>
+                    <Sun className="w-4 h-4" />
+                    <span>Light Mode</span>
+                  </>
+                ) : (
+                  <>
+                    <Moon className="w-4 h-4" />
+                    <span>Dark Mode</span>
+                  </>
+                )}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
