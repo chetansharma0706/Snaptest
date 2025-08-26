@@ -33,6 +33,7 @@ import {
 import type { User } from "next-auth"
 import { logOut } from "@/lib/auth"
 import { Skeleton } from "./ui/skeleton"
+import { useTheme } from "next-themes"
 
 const DEFAULT_AVATAR = "https://www.gravatar.com/avatar/?d=mp"
 
@@ -66,6 +67,7 @@ export function NavUser({
 }: {
   user?: User
 }) {
+   const { theme, setTheme } = useTheme()
   const { isMobile } = useSidebar()
   if (!user) {
 
@@ -120,9 +122,9 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="cursor-pointer">
                 <SunMoon />
-                Switch theme
+                {theme === "dark" ? "Light Mode" : "Dark Mode"}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

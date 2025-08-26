@@ -145,7 +145,7 @@ export default function AllTestsPage({ tests }: { tests: any }) {
                         {tests.length !== 0 ? <h1 className="text-2xl font-semibold text-foreground">All Created Tests</h1> :
                             <h2 className="text-xl font-semibold text-foreground">No tests created yet. Start by creating your first test!</h2>}
                     </div>
-                    <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg" onClick={() => setOpen(true)}>Create new Test <Plus /></Button>
+                    <Button className="px-6 py-2 rounded-lg" onClick={() => setOpen(true)}>Create new Test <Plus /></Button>
                     <DialogModal open={open} setOpen={setOpen} loading={loading} handleSubmit={handleSubmit} description="Fill in the details below to create a new test." title="Create Test" />
 
                 </div>

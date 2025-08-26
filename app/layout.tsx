@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SessionProvider } from "next-auth/react"
 import { Geist, Geist_Mono, Poppins } from "next/font/google"
+import { ThemeProvider } from "next-themes"
 import "./globals.css"
 
 const poppins = Poppins({
@@ -30,14 +31,22 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  
+
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} antialiased dark`}
+        className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} antialiased`}
       >
-      <SessionProvider>{children}</SessionProvider>
-        
+        <SessionProvider>
+          <ThemeProvider
+          attribute="class"
+          defaultTheme="light"   
+          enableSystem={true}  // or "system"
+        >
+          {children}
+        </ThemeProvider>
+        </SessionProvider>
+
       </body>
     </html>
   );

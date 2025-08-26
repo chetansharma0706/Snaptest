@@ -93,33 +93,33 @@ export default function PerformanceReport({ data }: PerformanceReportProps) {
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
           <Trophy className="h-8 w-8 text-foreground" />
-          <h1 className="text-3xl font-bold text-foreground">Performance Report</h1>
+          <h1 className="text-xl md:text-3xl font-bold text-foreground">Performance Report</h1>
         </div>
 
         {/* Participant Information Card */}
         <Card className="mb-6">
           <CardContent className="p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 md:gap-4">
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <UserIcon className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Participant</p>
-                    <p className="text-lg font-semibold text-foreground">{data.user.name}</p>
+                    <p className="text-xs md:text-sm text-muted-foreground">Participant</p>
+                    <p className="text-sm md:text-lg font-semibold text-foreground">{data.user.name}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Mail className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Email</p>
-                    <p className="text-sm text-foreground">{data.user.email}</p>
+                    <p className="text-xs md:text-sm text-muted-foreground">Email</p>
+                    <p className="text-xs md:text-sm text-foreground">{data.user.email}</p>
                   </div>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm text-muted-foreground">Quiz Completed</p>
-                <p className="text-lg font-medium text-foreground">{data.quiz.title}</p>
-                <p className="text-sm text-muted-foreground">{formatDate(data.createdAt)}</p>
+                <p className="text-xs md:text-sm text-muted-foreground">Quiz Completed</p>
+                <p className="text-sm md:text-lg font-medium text-foreground">{data.quiz.title}</p>
+                <p className="text-xs md:text-sm text-muted-foreground">{formatDate(data.createdAt)}</p>
               </div>
             </div>
           </CardContent>
@@ -209,13 +209,13 @@ export default function PerformanceReport({ data }: PerformanceReportProps) {
               const explanation =  question.explanation === "" || question.explanation === undefined ? "No explanation provided." : question.explanation
 
               return (
-                <div key={question.id} className="p-6 mb-4">
-                  <div className="flex items-start gap-4">
+                <div key={question.id} className="p-6 my-2">
+                  <div className="flex items-start gap-2 md:gap-4">
                     <div className="flex-shrink-0">
                       {isCorrect ? (
-                        <CheckCircle className="h-6 w-6 text-success" />
+                        <CheckCircle className="h-4 md:h-6 w-4 md:w-6 text-success" />
                       ) : (
-                        <XCircle className="h-6 w-6 text-destructive" />
+                        <XCircle className="h-4 md:h-6 w-4 md:w-6 text-destructive" />
                       )}
                     </div>
 
@@ -227,13 +227,13 @@ export default function PerformanceReport({ data }: PerformanceReportProps) {
                             {isCorrect ? "Correct" : "Incorrect"}
                           </Badge>
                         </div>
-                        <h4 className="text-lg font-medium text-foreground mb-3">{question.text}</h4>
+                        <h4 className="text-sm md:text-lg font-medium text-foreground mb-3">{question.text}</h4>
                       </div>
 
                       <div className="space-y-2">
                         {answer && (
                           <div className="flex flex-col md:flex-row  md:items-center gap-2">
-                            <span className="text-sm font-medium text-muted-foreground">Your Answer:</span>
+                            <span className="text-xs md:text-sm font-medium text-muted-foreground">Your Answer:</span>
                             <Badge
                               variant={answer.option.isCorrect ? "default" : "destructive"}
                               className="font-normal"
@@ -244,8 +244,8 @@ export default function PerformanceReport({ data }: PerformanceReportProps) {
                         )}
 
                         {!isCorrect && correctOption && (
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-muted-foreground">Correct Answer:</span>
+                          <div className="flex flex-col md:flex-row  md:items-center gap-2">
+                            <span className="text-xs md:text-sm font-medium text-muted-foreground">Correct Answer:</span>
                             <Badge variant="default" className="font-normal bg-success text-success-foreground">
                               {truncateText(correctOption.text.trim(),30)}
                             </Badge>
@@ -255,7 +255,7 @@ export default function PerformanceReport({ data }: PerformanceReportProps) {
 
                       {/* All Options Display */}
                       <div className="mt-4">
-                        <p className="text-sm font-medium text-muted-foreground mb-2">All Options:</p>
+                        <p className="text-xs md:text-sm font-medium text-muted-foreground mb-2">All Options:</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {question.options.map((option, optIndex) => {
                             const isUserChoice = answer ? option.id === answer.optionId : false
@@ -265,7 +265,7 @@ export default function PerformanceReport({ data }: PerformanceReportProps) {
                               <div
                                 key={option.id}
                                 className={cn(
-                                  "p-3 rounded-lg border text-sm",
+                                  "p-3 rounded-lg border text-xs md:text-sm",
                                   isCorrectOption && "bg-success/10 border-success/20",
                                   isUserChoice && !isCorrectOption && "bg-destructive/10 border-destructive/20",
                                   !isUserChoice && !isCorrectOption && "bg-muted/50 border-border",
@@ -294,7 +294,7 @@ export default function PerformanceReport({ data }: PerformanceReportProps) {
                         </div>
                       </div>
                       <div className="mt-4">
-                        <p className="text-sm font-medium text-muted-foreground mb-1">Explanation: {explanation}</p>
+                        <p className="text-xs md:text-sm font-medium text-muted-foreground mb-1">{explanation}</p>
                         </div>
                     </div>
                   </div>
