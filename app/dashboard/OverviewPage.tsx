@@ -29,19 +29,20 @@ export default function OverviewPage({ attempts }: { attempts: any }) {
             day: 86400,
             hour: 3600,
             minute: 60,
-            second: 1,
         }
+
+        if (seconds < 60) return "just now"
 
         for (const key in intervals) {
             const value = Math.floor(seconds / intervals[key])
-            if (value > 0) {
-                if (key === "second" && value < 60) return "just now"
+            if (value >= 1) {
                 return value === 1 ? `${value} ${key} ago` : `${value} ${key}s ago`
             }
         }
 
         return "just now"
     }
+
 
 
     return (
@@ -96,7 +97,7 @@ export default function OverviewPage({ attempts }: { attempts: any }) {
 //         id: string;
 //         title: string;
 //         description: string | null;
-        // timeLimit: number | null;
+// timeLimit: number | null;
 //         questions: {
 //             id: string;
 //         }[];

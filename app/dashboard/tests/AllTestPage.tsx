@@ -52,27 +52,28 @@ export default function AllTestsPage({ tests }: { tests: any }) {
     }
 
     function timeAgo(date: Date): string {
-        const seconds = Math.floor((Date.now() - date.getTime()) / 1000)
+    const seconds = Math.floor((Date.now() - date.getTime()) / 1000)
 
-        const intervals: { [key: string]: number } = {
-            year: 31536000,
-            month: 2592000,
-            day: 86400,
-            hour: 3600,
-            minute: 60,
-            second: 1,
-        }
-
-        for (const key in intervals) {
-            const value = Math.floor(seconds / intervals[key])
-            if (value > 0) {
-                if (key === "second" && value < 60) return "just now"
-                return value === 1 ? `${value} ${key} ago` : `${value} ${key}s ago`
-            }
-        }
-
-        return "just now"
+    const intervals: { [key: string]: number } = {
+        year: 31536000,
+        month: 2592000,
+        day: 86400,
+        hour: 3600,
+        minute: 60,
     }
+
+    if (seconds < 60) return "just now"
+
+    for (const key in intervals) {
+        const value = Math.floor(seconds / intervals[key])
+        if (value >= 1) {
+            return value === 1 ? `${value} ${key} ago` : `${value} ${key}s ago`
+        }
+    }
+
+    return "just now"
+}
+
 
 
     async function handleSubmit(e: FormEvent<HTMLFormElement>) {
