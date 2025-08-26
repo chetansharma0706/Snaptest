@@ -6,7 +6,7 @@ import { OptionType, QuestionType } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useReducer, useEffect, useCallback, useRef, useState } from "react";
-
+import LoadingScreen from "@/components/LoadingScreen";
 type TestState = {
   status: 'none' | 'ready' | 'active' | 'error' | 'finished';
   index: number;
@@ -27,7 +27,7 @@ export type Action =
   | { type: 'prevQues' }
   | { type: 'selectQues'; payload: number }
   | { type: 'answerQuestion'; payload: { questionIndex: number; selectedOptionIndex: number } }
-  | { type: 'tick' };
+  | { type: 'tick' }
 
 function reducer(state: TestState, action: Action): TestState {
   switch (action.type) {
@@ -57,8 +57,10 @@ function reducer(state: TestState, action: Action): TestState {
         score: 0,
       };
 
-    case 'endQuiz':
+    case 'endQuiz': {
+      
       return { ...state, status: 'finished' };
+    }
 
     case 'tick':
       return {
@@ -161,6 +163,58 @@ const handleAttempt = async () => {
 
   try {
     setLoading(true);
+    dispatch({ type: 'endQuiz' });
+
+    // Step 1: Create attempt
+    const response = await fetch('/api/attempts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ quizId: test.id, userId })
+    });
+
+    if (!response.ok) {
+      console.error('Failed to record attempt');
+      dispatch({type:"error"})
+      return;
+    }
+
+    const attempt = await response.json();
+
+    // Step 2: Save answers
+    const secondRes = await fetch(`/api/attempts/${attempt.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        quizId: test.id,
+        userId,
+        answers: Array.from(selectedAnswers.entries()).map(([questionId, option]) => ({
+          attemptId: attempt.id,
+          questionId,
+          optionId: option.id,
+        })),
+        score,
+      })
+    });
+
+    if (!secondRes.ok) {
+      console.error('Failed to record answers');
+      dispatch({type:"error"})
+      return;
+    }
+
+    console.log('Answers recorded successfully');
+    router.push(`/attempt/thanks/${attempt.id}`);
+    
+  } catch (error) {
+    console.error('Error occurred while recording attempt:', error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+const handleAttemptbyTimeOver = async () => {
+
+  try {
 
     // Step 1: Create attempt
     const response = await fetch('/api/attempts', {
@@ -347,7 +401,9 @@ const handleAttempt = async () => {
   // Auto-finish when time runs out
   useEffect(() => {
     if (secondsRemaining === 0 && status === 'active') {
+      // End the quiz and submit answers when time is up
       dispatch({ type: 'endQuiz' });
+      handleAttemptbyTimeOver();
     }
   }, [secondsRemaining, status]);
 
@@ -385,6 +441,8 @@ const handleAttempt = async () => {
           />
         </div>
       )}
+
+      {status === "finished" && <LoadingScreen message="Test finished. Submitting your answers..." />}
 
       {status === "error" && (
         <div className="min-h-screen flex items-center justify-center p-4">

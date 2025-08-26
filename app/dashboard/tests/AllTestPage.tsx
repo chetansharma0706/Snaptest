@@ -27,6 +27,7 @@ export default function AllTestsPage({ tests }: { tests: any }) {
 
 
     async function handleDelete(id: string) {
+        if(!window.confirm("Are you sure you want to delete this test? This action cannot be undone.")) return 
         try {
             console.log(id)
 
