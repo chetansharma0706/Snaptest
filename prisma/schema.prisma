@@ -1,12 +1,15 @@
 // prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
+
   // output   = "../app/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql" // can be "mysql" or "sqlite" if you want
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+
 }
 
 model User {

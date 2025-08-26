@@ -572,7 +572,7 @@ export default function TestEditor({ test }: { test: any }) {
 
                             </>}
 
-                            <DropdownMenu>
+                            <DropdownMenu >
                                 <DropdownMenuTrigger asChild disabled={publishLoading}>
                                     {publishLoading ? <Loader2 className="animate-spin h-6 w-6" /> : <EllipsisVertical size={20} />}
 
