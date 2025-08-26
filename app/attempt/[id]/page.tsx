@@ -3,9 +3,9 @@ import TestPage from "./TestPage";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
-  const testId = params.id;
+  const testId = (await params).id;
   const userId = session?.user?.id;
 
   if (!session && !userId) {
