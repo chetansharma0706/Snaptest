@@ -22,7 +22,7 @@ export type Action =
   | { type: 'error' }
   | { type: 'startQuiz' }
   | { type: 'endQuiz' }
-  | { type: 'resetQuiz'} // Single action for all resets
+  | { type: 'resetQuiz' } // Single action for all resets
   | { type: 'nextQues' }
   | { type: 'prevQues' }
   | { type: 'selectQues'; payload: number }
@@ -58,7 +58,7 @@ function reducer(state: TestState, action: Action): TestState {
       };
 
     case 'endQuiz': {
-      
+
       return { ...state, status: 'finished' };
     }
 
@@ -158,110 +158,59 @@ export default function TestPage({
 
   const initialTimeLimit = test.timeLimit ? test.timeLimit * 60 : null;
 
-const handleAttempt = async () => {
-  if (!window.confirm("Are you sure you want to submit the test?")) return;
+  const handleAttempt = async () => {
 
-  try {
-    setLoading(true);
-    dispatch({ type: 'endQuiz' });
+    try {
+      setLoading(true);
+      dispatch({ type: 'endQuiz' });
 
-    // Step 1: Create attempt
-    const response = await fetch('/api/attempts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ quizId: test.id, userId })
-    });
+      // Step 1: Create attempt
+      const response = await fetch('/api/attempts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quizId: test.id, userId })
+      });
 
-    if (!response.ok) {
-      console.error('Failed to record attempt');
-      dispatch({type:"error"})
-      return;
+      if (!response.ok) {
+        console.error('Failed to record attempt');
+        dispatch({ type: "error" })
+        return;
+      }
+
+      const attempt = await response.json();
+
+      // Step 2: Save answers
+      const secondRes = await fetch(`/api/attempts/${attempt.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          quizId: test.id,
+          userId,
+          answers: Array.from(selectedAnswers.entries()).map(([questionId, option]) => ({
+            attemptId: attempt.id,
+            questionId,
+            optionId: option.id,
+          })),
+          score,
+        })
+      });
+
+      if (!secondRes.ok) {
+        console.error('Failed to record answers');
+        dispatch({ type: "error" })
+        return;
+      }
+
+      console.log('Answers recorded successfully');
+      router.push(`/attempt/thanks/${attempt.id}`);
+
+    } catch (error) {
+      console.error('Error occurred while recording attempt:', error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const attempt = await response.json();
-
-    // Step 2: Save answers
-    const secondRes = await fetch(`/api/attempts/${attempt.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        quizId: test.id,
-        userId,
-        answers: Array.from(selectedAnswers.entries()).map(([questionId, option]) => ({
-          attemptId: attempt.id,
-          questionId,
-          optionId: option.id,
-        })),
-        score,
-      })
-    });
-
-    if (!secondRes.ok) {
-      console.error('Failed to record answers');
-      dispatch({type:"error"})
-      return;
-    }
-
-    console.log('Answers recorded successfully');
-    router.push(`/attempt/thanks/${attempt.id}`);
-    
-  } catch (error) {
-    console.error('Error occurred while recording attempt:', error);
-  } finally {
-    setLoading(false);
-  }
-};
-
-const handleAttemptbyTimeOver = async () => {
-
-  try {
-
-    // Step 1: Create attempt
-    const response = await fetch('/api/attempts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ quizId: test.id, userId })
-    });
-
-    if (!response.ok) {
-      console.error('Failed to record attempt');
-      dispatch({type:"error"})
-      return;
-    }
-
-    const attempt = await response.json();
-
-    // Step 2: Save answers
-    const secondRes = await fetch(`/api/attempts/${attempt.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        quizId: test.id,
-        userId,
-        answers: Array.from(selectedAnswers.entries()).map(([questionId, option]) => ({
-          attemptId: attempt.id,
-          questionId,
-          optionId: option.id,
-        })),
-        score,
-      })
-    });
-
-    if (!secondRes.ok) {
-      console.error('Failed to record answers');
-      dispatch({type:"error"})
-      return;
-    }
-
-    console.log('Answers recorded successfully');
-    router.push(`/attempt/thanks/${attempt.id}`);
-    
-  } catch (error) {
-    console.error('Error occurred while recording attempt:', error);
-  } finally {
-    setLoading(false);
-  }
-};
 
   // Refs to track focus state and timers
   const isTabFocusedRef = useRef(true);
@@ -279,10 +228,10 @@ const handleAttemptbyTimeOver = async () => {
   // Function to start the reset timer
   const startResetTimer = useCallback(() => {
     if (status !== 'active') return;
-    
+
     // Clear any existing timer first
     clearResetTimer();
-    
+
     console.log('Starting 5-second reset timer...');
     resetTimerRef.current = setTimeout(() => {
       // console.log('5 seconds elapsed - Resetting test');
@@ -400,10 +349,14 @@ const handleAttemptbyTimeOver = async () => {
 
   // Auto-finish when time runs out
   useEffect(() => {
-    if (secondsRemaining === 0 && status === 'active') {
-      // End the quiz and submit answers when time is up
-      dispatch({ type: 'endQuiz' });
-      handleAttemptbyTimeOver();
+    const handleTimeUp = async () => {
+      if (status === 'active') {
+        dispatch({ type: 'endQuiz' });
+        await handleAttempt();
+      }
+    };
+    if (secondsRemaining === 0) {
+      handleTimeUp();
     }
   }, [secondsRemaining, status]);
 
@@ -442,7 +395,16 @@ const handleAttemptbyTimeOver = async () => {
         </div>
       )}
 
-      {status === "finished" && <LoadingScreen message="Test finished. Submitting your answers..." />}
+      {status === "finished" && <div className="flex flex-col gap-6 justify-center items-center fixed inset-0 bg-background z-50 h-screen">
+        <div
+          className="inline-block h-10 w-10 animate-[spin_0.5s_linear_infinite] rounded-full border-4 border-solid border-primary/70 border-r-transparent align-[-0.125em]"
+          role="status"
+        >
+
+        </div>
+
+        <p className="text-sm md:text-lg text-foreground">Test Finished! Wrapping up your test…</p>
+      </div>}
 
       {status === "error" && (
         <div className="min-h-screen flex items-center justify-center p-4">

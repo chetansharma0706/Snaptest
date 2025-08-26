@@ -146,7 +146,12 @@
     @apply bg-background text-foreground;
   }
 }
+html{
+  scroll-behavior: smooth;
+  background-color: var(--background);
+    overflow-x: hidden;
 
+}
 body {
   font-family: var(--font-poppins);
   overflow-x: hidden;

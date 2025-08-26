@@ -33,6 +33,7 @@ import { DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger, DropdownMen
 import { Separator } from '@/components/ui/separator';
 import { ShareUrlDialog } from '@/components/ShareUrl';
 import {  toast } from 'react-toastify';
+import LoadingScreen from '@/components/LoadingScreen';
 
 interface Option {
     text: string
@@ -71,7 +72,7 @@ interface TestState {
 type Actions =
     | { type: "SET_TITLE"; payload: string }
     | { type: "SET_DESCRIPTION"; payload: string }
-    | { type: "SET_TIME_LIMIT"; payload: number }
+    | { type: "SET_TIME_LIMIT"; payload: number | null }
     | { type: "SET_STATUS"; payload: status }
     | { type: "SET_SAVE_LOADING"; payload: boolean }
     | { type: "SET_PUB_LOADING"; payload: boolean }
@@ -388,6 +389,8 @@ export default function TestEditor({ test }: { test: any }) {
     return (
         <div className="min-h-screen bg-background flex flex-col">
             
+        {saveLoading && <LoadingScreen message="Just a sec..." />}
+                {publishLoading && <LoadingScreen message="Just a sec..." />}
 
             {/* Header */}
             <header className="border-b border-border px-6 py-4">
@@ -435,11 +438,14 @@ export default function TestEditor({ test }: { test: any }) {
                                     {/* Time Limit Dropdown */}
                                     <div className="grid gap-2">
                                         <Label htmlFor="timelimit">Time Limit</Label>
-                                        <Select name="timeLimit" value={timeLimit?.toString()} onValueChange={(value) => dispatch({ type: "SET_TIME_LIMIT", payload: parseInt(value) })}>
+                                        <Select name="timeLimit" value={timeLimit?.toString()} onValueChange={(value) => dispatch({ type: "SET_TIME_LIMIT", payload: value === "null" ? null : parseInt(value) })}>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select time limit" />
                                             </SelectTrigger>
                                             <SelectContent>
+                                                <SelectItem value={"null"}>
+                                                    No time limit
+                                                    </SelectItem>
                                                 {Array.from({ length: 2 }, (_, i) => (i + 1) * 5).map((min) => (
                                                     <SelectItem key={min} value={min.toString()}>
                                                         {min} minutes

@@ -54,17 +54,17 @@ export default function ActiveTestScreen({
 
   // Handle answer selection
   const handleAnswerSelect = (optionIndex: number) => {
-    if(optionIndex === selectedAnswers.get(currentQuestion.id)?.optionIndex) {
+    if (optionIndex === selectedAnswers.get(currentQuestion.id)?.optionIndex) {
       selectedAnswers.delete(currentQuestion.id);
-    }else{
-    dispatch({
-      type: "answerQuestion",
-      payload: {
-        questionIndex: index,
-        selectedOptionIndex: optionIndex
-      }
-    });
-  }
+    } else {
+      dispatch({
+        type: "answerQuestion",
+        payload: {
+          questionIndex: index,
+          selectedOptionIndex: optionIndex
+        }
+      });
+    }
   };
 
   // Navigation handlers
@@ -75,8 +75,10 @@ export default function ActiveTestScreen({
   const handleNext = async () => {
     if (index === totalQuestions - 1) {
       // Last question - submit
-      await handleAttempt()
-      dispatch({ type: 'endQuiz' });
+      if (window.confirm("Are you sure you want to submit the test?")) {
+        await handleAttempt()
+        dispatch({ type: 'endQuiz' });
+      }
     } else {
       dispatch({ type: 'nextQues' });
     }
@@ -149,11 +151,11 @@ export default function ActiveTestScreen({
                         </span>
                       </div>
                     )}
-                  
+
                   </div>
                 </div>
                 <div className="text-xs flex items-center gap-1 mb-2 text-muted-foreground">
-                     Created by {teacherName}
+                  Created by {teacherName}
                 </div>
 
                 {/* Progress Bar */}
@@ -164,8 +166,8 @@ export default function ActiveTestScreen({
                   ></div>
                 </div>
                 <div className="text-sm mt-2 flex items-center gap-1 text-muted-foreground">
-                <Award className="w-4 h-4" />
-                      {progressPercentage}% Complete
+                  <Award className="w-4 h-4" />
+                  {progressPercentage}% Complete
                 </div>
               </div>
 
@@ -191,8 +193,8 @@ export default function ActiveTestScreen({
                       key={option.id}
                       onClick={() => handleAnswerSelect(optionIndex)}
                       className={`w-full p-4 text-left rounded-xl border-2 transition-all duration-200 hover:shadow-md ${isSelected
-                          ? "border-blue-500 shadow-md transform scale-[1.02]"
-                          : "border-gray-200 hover:border-gray-300 transform hover:scale-[1.01] hover:shadow-md"
+                        ? "border-blue-500 shadow-md transform scale-[1.02]"
+                        : "border-gray-200 hover:border-gray-300 transform hover:scale-[1.01] hover:shadow-md"
                         }`}
                     >
                       <div className="flex items-center gap-3">
@@ -268,10 +270,10 @@ export default function ActiveTestScreen({
                       key={question.id}
                       onClick={() => handleQuestionSelect(questionIndex)}
                       className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all duration-200 hover:shadow-sm ${status === "current"
-                          ? "bg-blue-100 border-2 border-blue-300 shadow-sm"
-                          : status === "answered"
-                            ? "bg-green-50 hover:bg-green-100"
-                            : "bg-secondary hover:bg-secondary/30 border border-border"
+                        ? "bg-blue-100 border-2 border-blue-300 shadow-sm"
+                        : status === "answered"
+                          ? "bg-green-50 hover:bg-green-100"
+                          : "bg-secondary hover:bg-secondary/30 border border-border"
                         }`}
                     >
                       {status === "answered" ? (
@@ -285,10 +287,10 @@ export default function ActiveTestScreen({
                       )}
                       <span
                         className={`text-sm font-medium ${status === "answered"
-                            ? "text-green-700"
-                            : status === "current"
-                              ? "text-blue-700"
-                              : "text-ring/foreground"
+                          ? "text-green-700"
+                          : status === "current"
+                            ? "text-blue-700"
+                            : "text-ring/foreground"
                           }`}
                       >
                         Question {questionIndex + 1}
