@@ -133,7 +133,7 @@ function reducer(state: TestState, actions: Actions): TestState {
         case "SET_CURRENT_QUES_INDEX":
             return { ...state, currentQuestionIndex: actions.payload }
         case "SET_QUESTIONS":
-            return { ...state, questions: actions.payload }    
+            return { ...state, questions: actions.payload }
         case "SET_CURR_QUES": {
             const updatedQuestions = state.questions.map((q, index) =>
                 index === state.currentQuestionIndex ? { ...q, ...actions.payload } : q
@@ -267,6 +267,12 @@ export default function TestEditor({ test }: { test: any }) {
         status: status,
     }
 
+
+    function truncateText(text: string, maxLength: number): string {
+        if (!text) return ""
+        return text.length > maxLength ? text.slice(0, maxLength) + "..." : text
+    }
+
     const generateAiQues = async () => {
         dispatch({ type: "SET_AI_LOADING", payload: true })
         setAiDialogOpen(false)
@@ -389,7 +395,7 @@ export default function TestEditor({ test }: { test: any }) {
                         <Dialog>
                             {!aiLoading ?
                                 <DialogTrigger asChild>
-                                    <h2 className='font-semibold flex items-center gap-2 cursor-pointer'>{title} <SquarePen size={15} /></h2>
+                                    <h2 className='font-semibold flex items-center gap-2 cursor-pointer'>{truncateText(title , 15)} <SquarePen size={15} /></h2>
                                 </DialogTrigger> : <Skeleton className='w-30 md:w-100 h-8' />}
                             <DialogContent className="sm:max-w-[425px]">
                                 <DialogHeader>
@@ -444,106 +450,104 @@ export default function TestEditor({ test }: { test: any }) {
                             </DialogContent>
                         </Dialog>
                     </div>
-                    
+
 
                     <div className="flex items-center gap-3">
-                          <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
-                                <DialogTrigger asChild>
-                                    <Button size="sm" disabled={aiLoading}>
-                                        AI <Sparkles size={12} />
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent className="sm:max-w-[425px]">
-                                    <DialogHeader>
-                                        <DialogTitle className="flex gap-2">
-                                            Create Test with AI <Sparkles size={15} />
-                                        </DialogTitle>
-                                        <DialogDescription>
-                                            Save time—AI will generate questions in seconds.
-                                        </DialogDescription>
-                                    </DialogHeader>
+                        <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button size="sm" disabled={aiLoading}>
+                                    AI <Sparkles size={12} />
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[425px]">
+                                <DialogHeader>
+                                    <DialogTitle className="flex gap-2">
+                                        Create Test with AI <Sparkles size={15} />
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                        Save time—AI will generate questions in seconds.
+                                    </DialogDescription>
+                                </DialogHeader>
 
-                                    {/* AI Form */}
-                                    <div className="grid gap-4">
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="ai-topic">Topic</Label>
-                                            <Input
-                                                id="ai-topic"
-                                                name="ai-topic"
-                                                placeholder="e.g. Photosynthesis"
-                                                value={aiTopic}
-                                                onChange={(e) => dispatch({ type: "SET_AI_TOPIC", payload: e.target.value })}
-                                            />
-                                        </div>
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="ai-grade-level">Grade Level</Label>
-                                            <Input
-                                                id="ai-grade-level"
-                                                name="ai-grade-level"
-                                                placeholder="e.g. 7"
-                                                value={aiGradeLevel}
-                                                onChange={(e) => dispatch({ type: "SET_AI_GRADE_LEVEL", payload: e.target.value })}
-                                            />
-                                        </div>
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="ai-difficulty">Difficulty</Label>
-                                            <Select
-                                                name="ai-difficulty"
-                                                value={aiDifficulty}
-                                                onValueChange={(value) => dispatch({ type: "SET_AI_DIFFICULTY", payload: value as 'easy' | 'medium' | 'hard' })}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select difficulty" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="easy">Easy</SelectItem>
-                                                    <SelectItem value="medium">Medium</SelectItem>
-                                                    <SelectItem value="hard">Hard</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="ai-question-count">Number of Questions</Label>
-                                            <Input
-                                                id="ai-question-count"
-                                                name="ai-question-count"
-                                                type="number"
-                                                min={1}
-                                                max={Math.min(5, maxQuestions - questions.length > 0 ? maxQuestions - questions.length : 1)}
-                                                value={aiQuestionCount}
-                                                onChange={(e) => {
-                                                    let value = Number(e.target.value);
-                                                    const maxAllowed = Math.min(5, maxQuestions - questions.length > 0 ? maxQuestions - questions.length : 1);
-                                                    if (isNaN(value) || value < 1) value = 1;
-                                                    if (value > maxAllowed) value = maxAllowed;
-                                                    dispatch({ type: "SET_AI_QUESTION_COUNT", payload: value });
-                                                }}
-                                                inputMode="numeric"
-                                                pattern="[0-9]*"
-                                            />
-                                            <span className="text-xs text-muted-foreground">
-                                                Max: {maxQuestions - questions.length > 0 ? maxQuestions - questions.length : 1}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="grid gap-4">
-                                        <Textarea
-                                            id="aiprompt"
-                                            name="aiprompt"
-                                            placeholder="Describe your topic and let AI build a quiz for you."
-                                            value={aiAdditionalContext}
-                                            onChange={(e) => dispatch({ type: "SET_AI_ADDITIONAL_CONTEXT", payload: e.target.value })}
-                                            className="h-30"
+                                {/* AI Form */}
+                                <div className="grid gap-4">
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="ai-topic">Topic</Label>
+                                        <Input
+                                            id="ai-topic"
+                                            name="ai-topic"
+                                            placeholder="e.g. Photosynthesis"
+                                            value={aiTopic}
+                                            onChange={(e) => dispatch({ type: "SET_AI_TOPIC", payload: e.target.value })}
                                         />
                                     </div>
-                                    <DialogFooter>
-                                        <Button disabled={aiTopic.trim() === "" || aiLoading} onClick={generateAiQues}>{aiLoading ? <>Generating... <Loader2 className="animate-spin h-4 w-4" /></> : "Generate Questions"}</Button>
-                                    </DialogFooter>
-                                </DialogContent>
-                            </Dialog>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="ai-grade-level">Grade Level</Label>
+                                        <Input
+                                            id="ai-grade-level"
+                                            name="ai-grade-level"
+                                            placeholder="e.g. 7"
+                                            value={aiGradeLevel}
+                                            onChange={(e) => dispatch({ type: "SET_AI_GRADE_LEVEL", payload: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="ai-difficulty">Difficulty</Label>
+                                        <Select
+                                            name="ai-difficulty"
+                                            value={aiDifficulty}
+                                            onValueChange={(value) => dispatch({ type: "SET_AI_DIFFICULTY", payload: value as 'easy' | 'medium' | 'hard' })}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select difficulty" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="easy">Easy</SelectItem>
+                                                <SelectItem value="medium">Medium</SelectItem>
+                                                <SelectItem value="hard">Hard</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="ai-question-count">Number of Questions</Label>
+                                        <Input
+                                            id="ai-question-count"
+                                            name="ai-question-count"
+                                            type="text"
+                                            max={5}
+                                            value={aiQuestionCount}
+                                            onChange={(e) => {
+                                                let value = parseInt(e.target.value);
+                                                if (isNaN(value) || value <= 0) value = 1;
+                                                if (value > 5) value = 5;
+                                                dispatch({ type: "SET_AI_QUESTION_COUNT", payload: value });
+                                            }}
+                                            inputMode="numeric"
+                                            pattern="[0-9]*"
+                                        />
+                                        <span className="text-xs text-muted-foreground">
+                                            Max: {maxQuestions - questions.length > 0 ? maxQuestions - questions.length : 1}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="grid gap-4">
+                                    <Textarea
+                                        id="aiprompt"
+                                        name="aiprompt"
+                                        placeholder="Describe your topic and let AI build a quiz for you."
+                                        value={aiAdditionalContext}
+                                        onChange={(e) => dispatch({ type: "SET_AI_ADDITIONAL_CONTEXT", payload: e.target.value })}
+                                        className="h-30"
+                                    />
+                                </div>
+                                <DialogFooter>
+                                    <Button disabled={aiTopic.trim() === "" || aiLoading} onClick={generateAiQues}>{aiLoading ? <>Generating... <Loader2 className="animate-spin h-4 w-4" /></> : "Generate Questions"}</Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                         {/* Desktop: show buttons normally */}
                         <div className="hidden sm:flex items-center gap-3">
-                        
+
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -762,11 +766,12 @@ export default function TestEditor({ test }: { test: any }) {
                                                     <div key={index} className="flex items-center space-x-3">
                                                         <RadioGroupItem value={index.toString()} id={`option-${index}`} />
                                                         <div className="flex-1">
-                                                            <Input
+                                                            <Textarea
                                                                 value={option.text}
+                                                                onInput={(e) => { e.currentTarget.style.height = "auto"; e.currentTarget.style.height = `${e.currentTarget.scrollHeight}px`; }}
                                                                 onChange={(e) => dispatch({ type: "SET_CURR_QUES_OPTION", payload: { optionIndex: index, text: e.target.value } })}
                                                                 placeholder={`Option ${String.fromCharCode(65 + index)}`}
-                                                                className="border-input"
+                                                                className="w-full resize-none overflow-hidden min-h-[40px]"
                                                             />
                                                         </div>
                                                     </div>

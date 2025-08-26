@@ -6,7 +6,7 @@ export function QuestionEditorSkeleton() {
     <div className="flex-1 px-6 py-8">
       <div className="max-w-4xl mx-auto relative">
 
-        <Card className="skeleton bg-black border-0 shadow-sm">
+        <Card className="skeleton bg-card border-0 shadow-sm">
           <CardContent className="p-8 space-y-6">
             {/* Question header */}
             <div className="flex items-center justify-between">

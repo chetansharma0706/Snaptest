@@ -108,7 +108,6 @@ ${additionalContext ? `Additional context: ${additionalContext}` : ''}
 
 Generate exactly ${questionCount} questions.`;
 
-console.log("Sending prompt to Gemini:", sysPrompt + "\n" + prompt);
 
   try {
     const response = await ai.models.generateContent({

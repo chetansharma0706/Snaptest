@@ -271,7 +271,7 @@ export default function ActiveTestScreen({
                           ? "bg-blue-100 border-2 border-blue-300 shadow-sm"
                           : status === "answered"
                             ? "bg-green-50 hover:bg-green-100"
-                            : "bg-muted-foreground"
+                            : "bg-secondary hover:bg-secondary/30 border border-border"
                         }`}
                     >
                       {status === "answered" ? (
@@ -281,14 +281,14 @@ export default function ActiveTestScreen({
                       ) : status === "current" ? (
                         <div className="w-6 h-6 bg-blue-500 rounded-full shadow-sm animate-pulse"></div>
                       ) : (
-                        <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                        <div className="w-6 h-6 bg-ring rounded-full"></div>
                       )}
                       <span
                         className={`text-sm font-medium ${status === "answered"
                             ? "text-green-700"
                             : status === "current"
                               ? "text-blue-700"
-                              : "text-gray-700"
+                              : "text-ring/foreground"
                           }`}
                       >
                         Question {questionIndex + 1}

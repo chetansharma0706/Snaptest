@@ -24,7 +24,7 @@ export function TestStartInterface({
 }: TestStartInterfaceProps) {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-2xl mb-16">
         <Card className="shadow-lg border-0 bg-card/50 backdrop-blur-sm">
           <CardHeader className="text-center space-y-6 pb-8">
             <div className="space-y-2">

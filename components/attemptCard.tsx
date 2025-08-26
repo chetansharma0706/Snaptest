@@ -1,17 +1,9 @@
 "use client"
 
 import type React from "react"
-import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { Clock, Users, BookOpen, MoreHorizontal, Edit, Share, Trash2, MessageCircleQuestionMark, ExternalLink } from "lucide-react"
+import { Clock, BookOpen, MessageCircleQuestionMark, ExternalLink, CheckCircle } from "lucide-react"
 import { ShareUrlDialog } from "./ShareUrl"
 import { useState } from "react"
 
@@ -66,8 +58,8 @@ export function AttemptCard({
           {/* Title & Description */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center flex-wrap gap-2">
-              <h3 className="text-base sm:text-lg font-semibold text-card-foreground truncate">
-                {truncateText(title, 50)}
+              <h3 className="text-base sm:text-lg font-semibold flex items-center gap-1 md:gap-2 text-card-foreground truncate">
+                {truncateText(title, 50)}<CheckCircle className="h-4 md:h-6 w-4 md:w-6 text-success" />
               </h3>
             
             </div>

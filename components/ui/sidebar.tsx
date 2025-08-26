@@ -165,6 +165,24 @@ function Sidebar({
 }) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
 
+  let startX: number | null = null
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    startX = e.touches[0].clientX
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (startX === null) return
+    const currentX = e.touches[0].clientX
+    const diff = currentX - startX
+
+    // If swipe left more than 80px → close sidebar
+    if (diff < -80) {
+      setOpenMobile(false)
+      startX = null
+    }
+  }
+
   if (collapsible === "none") {
     return (
       <div
@@ -187,6 +205,8 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
           className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
           style={
             {
@@ -569,7 +589,7 @@ function SidebarMenuAction({
         "peer-data-[size=lg]/menu-button:top-2.5",
         "group-data-[collapsible=icon]:hidden",
         showOnHover &&
-          "peer-data-[active=true]/menu-button:text-sidebar-accent-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 md:opacity-0",
+        "peer-data-[active=true]/menu-button:text-sidebar-accent-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 md:opacity-0",
         className
       )}
       {...props}

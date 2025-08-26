@@ -8,16 +8,17 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 
 
 
 export default function OverviewPage({ attempts }: { attempts: any }) {
-    const router = useRouter()
 
+    const { data : session  } = useSession()
+    const userName = session?.user?.name
+    const welcomeMess = userName ? `Welcome, ${userName.split(" ")[0]}!` : "Welcome Dear"
 
 
     function timeAgo(date: Date): string {
@@ -61,7 +62,7 @@ export default function OverviewPage({ attempts }: { attempts: any }) {
                             </BreadcrumbItem>
                             <BreadcrumbSeparator className="hidden md:block" />
                             <BreadcrumbItem>
-                                <BreadcrumbPage>Overview</BreadcrumbPage>
+                                <BreadcrumbPage>{welcomeMess}</BreadcrumbPage>
                             </BreadcrumbItem>
                         </BreadcrumbList>
                     </Breadcrumb>

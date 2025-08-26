@@ -78,9 +78,9 @@ export function TestCard({
         {/* Left Section */}
         <div className="flex items-start justify-center gap-3 sm:flex-1">
           {/* Icon */}
-          {/* <div className="flex-shrink-0 w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-            {icon || defaultIcon}
-          </div> */}
+          <div className="hidden flex-shrink-0 w-10 h-10 bg-primary/10 rounded-xl md:flex items-center justify-center">
+            {defaultIcon}
+          </div>
 
           {/* Title & Description */}
           <div className="flex-1 min-w-0">

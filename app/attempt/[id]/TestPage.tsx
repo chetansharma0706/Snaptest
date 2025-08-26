@@ -22,7 +22,7 @@ export type Action =
   | { type: 'error' }
   | { type: 'startQuiz' }
   | { type: 'endQuiz' }
-  | { type: 'resetQuiz', payload?: { timeLimit?: number | null } } // Single action for all resets
+  | { type: 'resetQuiz'} // Single action for all resets
   | { type: 'nextQues' }
   | { type: 'prevQues' }
   | { type: 'selectQues'; payload: number }
@@ -49,12 +49,12 @@ function reducer(state: TestState, action: Action): TestState {
     case 'resetQuiz':
       // Reset to initial state - works for both manual resets and security violations
       return {
+        ...state,
         questions: state.questions,
         status: 'ready',
         index: 0,
         selectedAnswers: new Map(),
         score: 0,
-        secondsRemaining: action.payload?.timeLimit || null,
       };
 
     case 'endQuiz':
@@ -218,7 +218,7 @@ const handleAttempt = async () => {
     if (resetTimerRef.current) {
       clearTimeout(resetTimerRef.current);
       resetTimerRef.current = null;
-      console.log('Reset timer cleared - user returned within 5 seconds');
+      // console.log('Reset timer cleared - user returned within 5 seconds');
     }
   }, []);
 
@@ -231,8 +231,8 @@ const handleAttempt = async () => {
     
     console.log('Starting 5-second reset timer...');
     resetTimerRef.current = setTimeout(() => {
-      console.log('5 seconds elapsed - Resetting test');
-      dispatch({ type: 'resetQuiz', payload: { timeLimit: initialTimeLimit } });
+      // console.log('5 seconds elapsed - Resetting test');
+      dispatch({ type: 'resetQuiz' });
       resetTimerRef.current = null;
     }, 5000); // 5 seconds
   }, [status, clearResetTimer, initialTimeLimit]);
@@ -244,12 +244,12 @@ const handleAttempt = async () => {
     if (document.hidden) {
       // User switched away from tab
       isTabFocusedRef.current = false;
-      console.log('Tab switched away - Starting 5-second timer');
+      // console.log('Tab switched away - Starting 5-second timer');
       startResetTimer();
     } else {
       // User returned to tab
       isTabFocusedRef.current = true;
-      console.log('Tab is now visible - Clearing timer');
+      // console.log('Tab is now visible - Clearing timer');
       clearResetTimer();
     }
   }, [status, startResetTimer, clearResetTimer]);
@@ -258,7 +258,7 @@ const handleAttempt = async () => {
     if (status !== 'active') return;
 
     isTabFocusedRef.current = true;
-    console.log('Window gained focus - Clearing timer');
+    // console.log('Window gained focus - Clearing timer');
     clearResetTimer();
   }, [status, clearResetTimer]);
 
@@ -272,8 +272,8 @@ const handleAttempt = async () => {
 
   // Prevent common cheating methods
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (status !== 'active') return;
-
+    if (status !== 'active' && status !== 'ready') return;
+    // console.log('Key down detected:', e.key);
     // Prevent F12, Ctrl+Shift+I, Ctrl+U, Ctrl+Shift+C, etc.
     if (
       e.key === 'F12' ||
@@ -284,12 +284,14 @@ const handleAttempt = async () => {
       (e.ctrlKey && e.key === 'r')
     ) {
       e.preventDefault();
-      dispatch({ type: 'resetQuiz', payload: { timeLimit: initialTimeLimit } });
+      dispatch({ type: 'resetQuiz' });
     }
-  }, [status, initialTimeLimit]);
+  }, [status]);
 
   const handleContextMenu = useCallback((e: MouseEvent) => {
-    if (status === 'active') {
+    // console.log('Context menu (right-click) detected');
+    // Disable right-click context menu
+    if (status === 'active' || status === 'ready') {
       e.preventDefault();
     }
   }, [status]);
@@ -314,13 +316,20 @@ const handleAttempt = async () => {
         window.removeEventListener('blur', handleWindowBlur);
         window.removeEventListener('keydown', handleKeyDown);
         window.removeEventListener('contextmenu', handleContextMenu);
-        
+
         // Clear timer when component unmounts or status changes
         clearResetTimer();
-      };
+      }
     } else {
-      // Clear timer when test is not active
-      clearResetTimer();
+      // For non-active statuses, only add/remove keydown and contextmenu listeners
+      window.addEventListener('keydown', handleKeyDown);
+      window.addEventListener('contextmenu', handleContextMenu);
+
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+        window.removeEventListener('contextmenu', handleContextMenu);
+        clearResetTimer();
+      };
     }
   }, [status, handleVisibilityChange, handleWindowFocus, handleWindowBlur, handleKeyDown, handleContextMenu, clearResetTimer]);
 
