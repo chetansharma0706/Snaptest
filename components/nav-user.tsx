@@ -69,7 +69,7 @@ export function NavUser({
 }: {
   user?: User
 }) {
-  const { resolvedTheme, setTheme } = useTheme()
+ const { resolvedTheme, setTheme } = useTheme()
   const { isMobile } = useSidebar()
   if (!user) {
 
