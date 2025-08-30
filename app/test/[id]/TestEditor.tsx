@@ -32,7 +32,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger, DropdownMenu } from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
 import { ShareUrlDialog } from '@/components/ShareUrl';
-import {  toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import LoadingScreen from '@/components/LoadingScreen';
 
 interface Option {
@@ -388,9 +388,9 @@ export default function TestEditor({ test }: { test: any }) {
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
-            
-        {saveLoading && <LoadingScreen message="Just a sec..." />}
-                {publishLoading && <LoadingScreen message="Just a sec..." />}
+
+            {saveLoading && <LoadingScreen message="Just a sec..." />}
+            {publishLoading && <LoadingScreen message="Just a sec..." />}
 
             {/* Header */}
             <header className="border-b border-border px-6 py-4">
@@ -445,7 +445,7 @@ export default function TestEditor({ test }: { test: any }) {
                                             <SelectContent>
                                                 <SelectItem value={"null"}>
                                                     No time limit
-                                                    </SelectItem>
+                                                </SelectItem>
                                                 {Array.from({ length: 2 }, (_, i) => (i + 1) * 5).map((min) => (
                                                     <SelectItem key={min} value={min.toString()}>
                                                         {min} minutes
@@ -518,25 +518,30 @@ export default function TestEditor({ test }: { test: any }) {
                                     </div>
                                     <div className="grid gap-2">
                                         <Label htmlFor="ai-question-count">Number of Questions</Label>
-                                        <Input
-                                            id="ai-question-count"
-                                            name="ai-question-count"
-                                            type="text"
-                                            max={5}
-                                            value={aiQuestionCount}
-                                            onChange={(e) => {
-                                                let value = parseInt(e.target.value);
-                                                if (isNaN(value) || value <= 0) value = 1;
-                                                if (value > 5) value = 5;
-                                                dispatch({ type: "SET_AI_QUESTION_COUNT", payload: value });
+
+                                        <Select
+                                            value={aiQuestionCount.toString()}
+                                            onValueChange={(val) => {
+                                                dispatch({ type: "SET_AI_QUESTION_COUNT", payload: parseInt(val) })
                                             }}
-                                            inputMode="numeric"
-                                            pattern="[0-9]*"
-                                        />
+                                        >
+                                            <SelectTrigger id="ai-question-count" className="w-[200px]">
+                                                <SelectValue placeholder="Select count" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {[1, 2, 3, 4, 5].map((num) => (
+                                                    <SelectItem key={num} value={num.toString()}>
+                                                        {num}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+
                                         <span className="text-xs text-muted-foreground">
-                                            Max: {maxQuestions - questions.length > 0 ? maxQuestions - questions.length : 1}
+                                            Choose between 1 and 5 questions
                                         </span>
                                     </div>
+
                                 </div>
                                 <div className="grid gap-4">
                                     <Textarea
