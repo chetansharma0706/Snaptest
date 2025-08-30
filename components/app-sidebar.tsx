@@ -29,14 +29,14 @@ const team = {
 // This is sample data.
 const tabs = [
     {
-      title: "Overview",
+      title: "Created Tests",
       url: "/dashboard",
       icon: LayoutDashboard,
       isActive: true,
     },
     {
-      title: "Tests",
-      url: "/dashboard/tests",
+      title: "Attempted Tests",
+      url: "/dashboard/attempted-test",
       icon: FileQuestion,
       isActive: true,
 

@@ -14,7 +14,7 @@ import { useSession } from "next-auth/react"
 
 
 
-export default function OverviewPage({ attempts }: { attempts: any }) {
+export default function AttemptedTestPage({ attempts }: { attempts: any }) {
 
     const { data : session  } = useSession()
     const userName = session?.user?.name

@@ -1,6 +1,5 @@
 "use client"
 import DialogModal from "@/components/dialogModal"
-import { ShareUrlDialog } from "@/components/ShareUrl"
 import { TestCard } from "@/components/testCard"
 import {
     Breadcrumb,
@@ -13,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Plus } from "lucide-react"
+import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import test from "node:test"
 import { FormEvent, useState } from "react"
@@ -24,6 +24,10 @@ export default function AllTestsPage({ tests }: { tests: any }) {
 
     const [loading, setLoading] = useState(false)
     const router = useRouter()
+
+    const { data : session  } = useSession()
+        const userName = session?.user?.name
+        const welcomeMess = userName ? `Welcome, ${userName.split(" ")[0]}!` : "Welcome Dear"
 
 
     async function handleDelete(id: string) {
@@ -40,7 +44,7 @@ export default function AllTestsPage({ tests }: { tests: any }) {
             })
 
             if (response.ok) {
-                router.push(`/dashboard/tests`)
+                router.push(`/dashboard`)
             } else {
                 console.log("Failed to delete test")
                 alert("Failed to delete test")
@@ -135,7 +139,7 @@ export default function AllTestsPage({ tests }: { tests: any }) {
                             </BreadcrumbItem>
                             <BreadcrumbSeparator className="hidden md:block" />
                             <BreadcrumbItem>
-                                <BreadcrumbPage>All Tests</BreadcrumbPage>
+                                <BreadcrumbPage>{welcomeMess}</BreadcrumbPage>
                             </BreadcrumbItem>
                         </BreadcrumbList>
                     </Breadcrumb>

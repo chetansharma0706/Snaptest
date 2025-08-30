@@ -1,35 +1,21 @@
 import { prisma } from "@/lib/prisma"
+import AllTestsPage from "./AllTestPage"
 import { auth } from "@/auth"
 import { redirect } from "next/navigation";
-import OverviewPage from "./OverviewPage";
 export default async function Tests() {
 
     const session = await auth();
     if (!session) return redirect("/")
     const userId = session?.user?.id
 
-    const data = await prisma.attempt.findMany({
+    const tests = await prisma.quiz.findMany({
         where: {
-            userId: userId,
+            createdBy: userId,
         },
-        select:{
-            id:true,
-            score:true,
-            createdAt:true,
-            quiz:{
-                select:{
-                    id:true,
-                    title:true,
-                    description:true,
-                    timeLimit:true,
-                    questions:{
-                        select:{id:true}
-                    }
-                }
-            }
-            
+        include: {
+            questions: true,  // optional
+            attempts: true,   // optional
         },
-        
         orderBy: {
             createdAt: "desc", // 👈 newest first
         },
@@ -38,7 +24,7 @@ export default async function Tests() {
 
     return (
         <>
-            <OverviewPage attempts={data} />
+            <AllTestsPage tests={tests} />
         </>
     )
 }

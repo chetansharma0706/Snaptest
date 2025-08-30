@@ -37,7 +37,7 @@ export function TeamSwitcher({
         <DropdownMenu>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="focus-visible:ring-0 focus-visible:outline-none data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="flex aspect-square size-7 items-center justify-center rounded-lg">
                 <team.logo className="size-8 text-primary" />

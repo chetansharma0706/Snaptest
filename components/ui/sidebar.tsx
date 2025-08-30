@@ -181,6 +181,7 @@ function Sidebar({
       setOpenMobile(false)
       startX = null
     }
+
   }
 
   if (collapsible === "none") {
